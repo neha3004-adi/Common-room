@@ -5,79 +5,502 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gryffindor Common Room Engine</title>
     <link rel="apple-touch-icon" href="https://i.imgur.com/8Yv6ZUX.png">
+    
+    <!-- LOAD FIREBASE CLOUD CORE CORE INFRASTRUCTURE BACKBONE -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <style>
-        :root { --gold: #FFD700; --scarlet: #740001; --dark-red: #3A0000; --parchment: #F4EAD4; --charcoal: #141414; --card-bg: #1e1711; }
-        body { font-family: 'Georgia', serif; background-color: var(--charcoal); background-image: radial-gradient(circle at center, var(--dark-red) 0%, #0a0a0a 100%); color: var(--parchment); padding: 20px; margin: 0; min-height: 100vh; }
-        .container { max-width: 650px; margin: 30px auto; border: 3px double var(--gold); padding: 25px; background: rgba(15, 10, 8, 0.95); position: relative; box-shadow: 0 0 25px rgba(116, 0, 1, 0.6), inset 0 0 15px rgba(0,0,0,0.8); border-radius: 12px; }
-        .page { display: none; } .active { display: block; animation: spellFade 0.4s ease-in-out; }
-        @keyframes spellFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        .summary-hud { background: linear-gradient(135deg, var(--scarlet) 0%, var(--dark-red) 100%); border: 2px solid var(--gold); padding: 15px; border-radius: 8px; margin-bottom: 25px; }
-        .clock-box { position: absolute; top: 18px; right: 15px; width: 85px; height: 85px; cursor: pointer; }
+        :root {
+            --gold: #FFD700;
+            --scarlet: #740001;
+            --dark-red: #3A0000;
+            --parchment: #F4EAD4;
+            --charcoal: #141414;
+            --card-bg: #1e1711;
+        }
+        
+        body { 
+            font-family: 'Georgia', serif; 
+            background-color: var(--charcoal); 
+            background-image: radial-gradient(circle at center, var(--dark-red) 0%, #0a0a0a 100%);
+            color: var(--parchment); 
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        .container { 
+            max-width: 650px; 
+            margin: 30px auto; 
+            border: 3px double var(--gold); 
+            padding: 25px; 
+            background: rgba(15, 10, 8, 0.95); 
+            position: relative; 
+            box-shadow: 0 0 25px rgba(116, 0, 1, 0.6), inset 0 0 15px rgba(0,0,0,0.8);
+            border-radius: 12px;
+        }
+        
+        .page { display: none; }
+        .active { display: block; animation: spellFade 0.4s ease-in-out; }
+        
+        @keyframes spellFade {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .summary-hud { 
+            background: linear-gradient(135deg, var(--scarlet) 0%, var(--dark-red) 100%); 
+            border: 2px solid var(--gold); 
+            padding: 15px; 
+            position: relative; 
+            min-height: 105px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            margin-bottom: 25px;
+            box-sizing: border-box;
+        }
+        .hud-left { width: 75%; display: inline-block; }
+        .hud-left h3 { margin: 0; color: var(--gold); text-shadow: 2px 2px #000; letter-spacing: 1px; font-size: 18px; }
+        .hud-metrics { display: flex; gap: 25px; font-size: 15px; margin-top: 10px; font-weight: bold; text-shadow: 1px 1px #000; align-items: center; }
+        
+        .hud-logout-trigger {
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--gold);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: bold;
+            opacity: 0.8;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .hud-logout-trigger:hover { opacity: 1; transform: scale(1.03); }
+
+        .clock-box { position: absolute; top: 18px; right: 15px; width: 85px; height: 85px; text-align: center; cursor: pointer; }
         #analog-canvas { background: #1a1512; border: 2px solid var(--gold); border-radius: 50%; box-shadow: 0 0 8px var(--gold); }
-        .menu-tab { border: 2px solid #3a2a1d; padding: 18px; background: linear-gradient(to right, var(--card-bg), #2d2117); margin-bottom: 14px; cursor: pointer; font-weight: bold; border-radius: 6px; }
-        .action-btn { background: var(--scarlet); color: white; border: 1px solid var(--gold); padding: 12px; width: 100%; cursor: pointer; font-family: 'Georgia', serif; font-weight: bold; }
-        .task-item { background: #1e1711; border: 1px solid #4a3b2c; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .admin-keyhole { position: absolute; bottom: 12px; right: 15px; cursor: pointer; border: none; background: none; font-size: 16px; }
+        #digital-clock { font-size: 11px; font-weight: bold; color: var(--gold); background: #000; padding: 5px 2px; border: 1px solid var(--gold); border-radius: 4px; box-shadow: 0 0 5px var(--gold); margin-top: 22px; }
+
+        .menu-stack { display: flex; flex-direction: column; gap: 14px; }
+        .menu-tab { 
+            border: 2px solid #3a2a1d; 
+            padding: 18px; 
+            background: linear-gradient(to right, var(--card-bg), #2d2117); 
+            text-align: left; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            color: var(--parchment);
+            border-radius: 6px;
+            box-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .menu-tab:hover { 
+            border-color: var(--gold); 
+            color: var(--gold);
+            transform: translateX(3px);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+        
+        .embedded-hud-icon { width: 24px; height: 24px; object-fit: contain; vertical-align: middle; border-radius: 4px; }
+        .embedded-nav-icon { width: 28px; height: 28px; object-fit: contain; }
+        .embedded-chest-badge { width: 20px; height: 20px; object-fit: contain; vertical-align: middle; margin-right: 4px; }
+        
+        .admin-keyhole { position: absolute; bottom: 12px; right: 15px; background: transparent; border: none; color: #443322; cursor: pointer; font-size: 16px; transition: color 0.3s; }
+        .admin-keyhole:hover { color: var(--gold); }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; color: var(--gold); font-weight: bold; font-size: 13px; letter-spacing: 0.5px; }
+        .form-group input, .form-group select { 
+            width: 100%; padding: 10px; box-sizing: border-box; background: #120d0a; color: #fff; 
+            border: 1px solid #5a4533; border-radius: 4px; font-family: monospace; font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--gold); outline: none; }
+        
+        .task-item { 
+            background: linear-gradient(135deg, var(--card-bg) 0%, #17110c 100%);
+            border: 1px solid #4a3b2c; padding: 14px; margin-bottom: 12px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-radius: 6px; box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            transition: border-color 0.3s;
+        }
+        .task-item:hover { border-color: #6e5640; }
+        .task-item.completed { opacity: 0.4; background: #0c1a0c; border-color: #1b4d1b; text-decoration: line-through; }
+        
+        .vocab-input-box { background: #16110d; padding: 16px; border: 1px dashed var(--gold); margin-bottom: 25px; border-radius: 6px; }
+        .scroll-log { max-height: 280px; overflow-y: auto; border: 1px solid #332211; padding: 12px; background: #0b0b0b; border-radius: 4px; }
+        .vocab-card { background: #18120e; padding: 14px; margin-bottom: 12px; border-left: 4px solid var(--scarlet); border-radius: 0 4px 4px 0; border-bottom: 1px solid #2d1f14; }
+        .vocab-timestamp { font-size: 11px; color: var(--gold); float: right; }
+
+        .quest-item-card { border: 2px dashed #3a2d20; padding: 16px; margin-bottom: 14px; background: #130f0b; filter: grayscale(100%); opacity: 0.4; border-radius: 6px; }
+        .quest-item-card.unlocked-achieved { border: 2px solid var(--gold); background: rgba(116,0,1,0.15); filter: grayscale(0%); opacity: 1; box-shadow: 0 0 10px rgba(255,215,0,0.15); }
+        .quest-status-badge { float: right; font-weight: bold; font-size: 12px; color: var(--gold); background: #000; padding: 2px 6px; border: 1px solid var(--gold); border-radius: 3px; }
+
+        .admin-repo-container { margin-top: 30px; border-top: 2px dashed var(--scarlet); padding-top: 20px; }
+        .repo-item { display: flex; align-items: center; background: #140f0c; padding: 12px; margin-bottom: 10px; border: 1px solid #3a2c1e; gap: 14px; border-radius: 4px; }
+        .repo-details { flex-grow: 1; font-size: 13px; }
+        
+        button.action-btn {
+            background: linear-gradient(to bottom, var(--scarlet) 0%, var(--dark-red) 100%);
+            color: var(--parchment); border: 1px solid var(--gold); padding: 12px; font-weight: bold;
+            font-size: 14px; font-family: 'Georgia', serif; border-radius: 6px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.4);
+            transition: transform 0.2s, filter 0.2s;
+        }
+        button.action-btn:hover { filter: brightness(1.2); transform: translateY(-1px); }
+        button.action-btn:active { transform: translateY(1px); }
+        
+        .eraser-btn { background: #5a0000 !important; border-color: #ff3333 !important; color: #ffcccc !important; width: 100%; margin-bottom: 15px;}
+        .eraser-btn:hover { background: #800000 !important; }
+        
+        .quest-alert-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 2000; }
+        .quest-alert-content { background: #1a120b; border: 3px double var(--gold); padding: 35px; text-align: center; max-width: 420px; border-radius: 10px; box-shadow: 0 0 35px var(--gold); }
     </style>
 </head>
 <body>
+
 <div class="container">
     <button class="admin-keyhole" onclick="accessAdminPanel()">🔑</button>
+
     <div id="master-summary-hud" class="summary-hud" style="display: none;">
-        <h3 onclick="navigateTo('page-hub')" style="cursor:pointer; color:var(--gold);">⚡ Gryffindor Common Room ⚡</h3>
-        <p>Streak: <span id="hud-streak">0</span> | Galleons: <span id="hud-coins">0</span></p>
-        <div class="clock-box"><canvas id="analog-canvas" width="80" height="80"></canvas></div>
+        <div class="hud-left">
+            <h3 onclick="returnToHub()" style="cursor:pointer;">⚡ Gryffindor House Common Room ⚡</h3>
+            <div style="font-size: 11px; color: #dbcbb4; margin-top: 3px; font-style: italic;">Today's Date: <span id="hud-date">Date</span></div>
+            <div class="hud-metrics">
+                <span><img src="harry on broom.png" class="embedded-hud-icon" onerror="this.style.display='none'"> Streak: <span id="hud-streak">0</span> Days</span>
+                <span><img src="treasure chest.jpg" class="embedded-hud-icon" onerror="this.style.display='none'"> Treasure Chest: <span id="hud-coins">0</span> Galleons</span>
+            </div>
+            <div class="hud-logout-trigger" onclick="logoutAdiFromEngine()">[ 🏃‍♂️ Sign Out / Lock Room ]</div>
+        </div>
+        <div class="clock-box" onclick="toggleClockMode()">
+            <canvas id="analog-canvas" width="80" height="80" style="display: block;"></canvas>
+            <div id="digital-clock" style="display: none;">00:00:00</div>
+        </div>
     </div>
+
     <div id="page-login" class="page active">
-        <h1 style="text-align:center; color:var(--gold);">⚡ Welcome to Hogwarts ⚡</h1>
-        <p style="text-align:center; font-style: italic;">"I solemnly swear that I am up to no good."</p>
-        <img src="harry on broom.png" style="width:120px; display:block; margin: 20px auto;">
-        <button class="action-btn" onclick="loginAdi()">Enter Common Room</button>
+        <h1 style="text-align: center; margin-top: 30px; color: var(--gold); text-shadow: 2px 2px #000;">⚡ Welcome to Hogwarts ⚡</h1>
+        
+        <div style="text-align: center; margin: 25px 0;">
+            <img src="harry on broom.png" alt="Adi avatar" style="width: 110px; height: 110px; object-fit: contain; border: 2px double var(--gold); padding: 8px; border-radius: 50%; background: #000; box-shadow: 0 0 15px rgba(255,215,0,0.3);" onerror="this.style.display='none'">
+        </div>
+        
+        <p style="text-align: center; font-style: italic; color:#bba88f; margin-bottom: 30px;">"I solemnly swear that I am up to no good."</p>
+        <div style="max-width: 260px; margin: 0 auto;">
+            <button class="action-btn" onclick="loginAdi()" style="width: 100%; padding: 18px; font-size: 18px; letter-spacing: 0.5px;">Enter Common Room</button>
+        </div>
     </div>
+
     <div id="page-hub" class="page">
-        <div class="menu-tab" onclick="navigateTo('page-challenges')">🎯 Today's Challenges</div>
-        <div class="menu-tab" onclick="navigateTo('page-quests')">🏆 Weekly Quests</div>
-        <div class="menu-tab" onclick="navigateTo('page-vocabulary')">📖 Spellbook</div>
-        <div class="menu-tab" onclick="navigateTo('page-analytics')">📊 Analytics</div>
-        <div class="menu-tab" onclick="navigateTo('page-rewards')">📦 Treasure Chest</div>
+        <div class="menu-stack">
+            <div class="menu-tab" onclick="navigateTo('page-challenges')"><span>🎯</span> Today's Challenges (<span id="hub-task-ratio">0/0</span>)</div>
+            <div class="menu-tab" onclick="navigateTo('page-quests')"><span>🏆</span> Quests Completed This Week</div>
+            <div class="menu-tab" onclick="navigateTo('page-vocabulary')"><span>📖</span> New Words I Learnt</div>
+            <div class="menu-tab" onclick="navigateTo('page-analytics')"><span>📊</span> How I Spent My Week</div>
+            <div class="menu-tab" onclick="navigateTo('page-rewards')">
+                <img src="treasure chest.jpg" class="embedded-nav-icon" onerror="this.style.display='none'"> Get My Rewards
+            </div>
+        </div>
     </div>
-    <div id="page-challenges" class="page"><h2>🎯 Challenges</h2><div id="task-container"></div><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
-    <div id="page-quests" class="page"><h2>🏆 Quests</h2><div id="quest-container"></div><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
-    <div id="page-vocabulary" class="page"><h2>📖 Spellbook</h2><input type="text" id="v-in"><button class="action-btn" onclick="addVocab()">Add</button><div id="v-list"></div><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
-    <div id="page-analytics" class="page"><h2>📊 Analytics</h2><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
-    <div id="page-rewards" class="page"><h2>📦 Treasure Chest</h2><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
-    <div id="page-admin" class="page">
-        <h2>🛡️ Prefect Admin</h2>
-        <input type="text" id="task-text" placeholder="Task">
-        <input type="number" id="task-points" placeholder="Points">
-        <button class="action-btn" onclick="handleAddTask()">Cast Task</button>
-        <button class="action-btn" onclick="navigateTo('page-hub')">Exit</button>
+
+    <div id="page-challenges" class="page">
+        <h2 style="text-align: center; color: var(--gold); margin-top: 0;">🎯 Today's Active Challenges</h2>
+        <div style="text-align: center; font-weight: bold; margin-bottom: 20px; color: var(--parchment);" id="challenges-header-progress">0 out of 0 Tasks Completed</div>
+        <div id="task-container"></div>
+        <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:15px; background: #332215;">↩ Return to Common Room</button>
     </div>
-</div>
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBXE-12Q8pM6_sTyfhYmMAiNhXgJV_R7Ck",
-        authDomain: "adi-day-planner.firebaseapp.com",
-        projectId: "adi-day-planner",
-        storageBucket: "adi-day-planner.firebasestorage.app",
-        messagingSenderId: "582460179914",
-        appId: "1:582460179914:web:53a7eae94028fdebf9bb33"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const docRef = db.collection("house_engine").doc("master_state");
-    let appData = { coins: 0, streak: 0, tasks: [], vocabulary: [] };
-    docRef.onSnapshot((doc) => { if (doc.exists()) { appData = doc.data(); updateUI(); } else { docRef.set(appData); } });
-    function save() { docRef.set(appData); }
-    function navigateTo(p) { document.querySelectorAll('.page').forEach(e => e.classList.remove('active')); document.getElementById(p).classList.add('active'); document.getElementById('master-summary-hud').style.display = (p === 'page-login' || p === 'page-admin') ? 'none' : 'block'; }
-    function loginAdi() { appData.streak++; save(); navigateTo('page-hub'); }
-    function updateUI() { document.getElementById('hud-streak').innerText = appData.streak || 0; document.getElementById('hud-coins').innerText = appData.coins || 0; drawClock(); }
-    function drawClock() { const ctx = document.getElementById('analog-canvas').getContext('2d'); ctx.clearRect(0,0,80,80); ctx.beginPath(); ctx.arc(40,40,35,0,2*Math.PI); ctx.strokeStyle = '#FFD700'; ctx.stroke(); }
-    function addVocab() { const v = document.getElementById('v-in').value; appData.vocabulary.push(v); save(); document.getElementById('v-list').innerHTML += `<div>${v}</div>`; }
-    function handleAddTask() { appData.tasks.push({ text: document.getElementById('task-text').value }); save(); alert("Task cast!"); }
-    function accessAdminPanel() { if(prompt("Passcode:") === "1211") navigateTo('page-admin'); }
-</script>
-</body>
-</html>
+
+    <div id="page-quests" class="page">
+        <h2 style="text-align: center; color: var(--gold); margin-top: 0;">🏆 Weekly House Quests</h2>
+        <p style="font-size: 12px; color:#bba88f; text-align:center; margin-bottom: 20px; font-style: italic;">
+            Fulfill specialized weekly goals. Reset occurs automatically every Monday morning!
+        </p>
+        <div id="quests-weekly-container"></div>
+        <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:15px; background: #332215;">↩ Return to Common Room</button>
+    </div>
+
+    <div id="page-vocabulary" class="page">
+        <h2 style="text-align: center; color: var(--gold); margin-top: 0;">📖 Spellbook Vocabulary Archive</h2>
+        <p style="font-size: 12px; color: #bba88f; margin-bottom: 20px; text-align: center; font-style: italic;">
+            This scroll collection is independent of weekly resets. Keep gathering words!
+        </p>
+        <div class="vocab-input-box">
+            <label>LOG NEW WORD ENCOUNTERED:</label>
+            <input type="text" id="vocab-input-field" placeholder="Type new word here and press Enter..." onkeydown="handleNewWordSubmission(event)">
+        </div>
+        <h3 style="color: var(--gold); border-bottom: 1px solid #4a3b2c; padding-bottom: 6px; font-size: 15px;">📜 Discovered Lexicon</h3>
+        <div class="scroll-log" id="vocab-archive-display"></div>
+        <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:25px; background: #332215;">↩ Return to Common Room</button>
+    </div>
+
+    <div id="page-analytics" class="page">
+        <h2 style="text-align: center; color: var(--gold); margin-top:0;">📊 Weekly Activity Allocation Map</h2>
+        <p style="font-size:12px; color:#bba88f; text-align:center; margin-bottom:20px; font-style: italic;">Proportional time distribution chart of assignments cleared this week.</p>
+        <div style="text-align:center; margin: 20px 0;">
+            <canvas id="analyticsPieCanvas" width="220" height="220"></canvas>
+        </div>
+        <div id="analytics-pie-legend"></div>
+        <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:25px; background: #332215;">↩ Return to Common Room</button>
+    </div>
+
+    <div id="page-rewards" class="page">
+        <h2 style="text-align: center; color: var(--gold); margin-top:0;">📦 Gringotts Treasure Chest</h2>
+        <p style="font-size: 12px; color: #bba88f; text-align: center; margin-bottom: 20px; font-style: italic;">Exchange your hard-earned Galleons for special rewards!</p>
+        <div id="rewards-container"></div>
+        <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:15px; background: #332215;">↩ Return to Common Room</button>
+    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gryffindor Common Room Engine</title>
+    <link rel="apple-touch-icon" href="https://i.imgur.com/8Yv6ZUX.png">
+    
+    <!-- LOAD FIREBASE CLOUD CORE CORE INFRASTRUCTURE BACKBONE -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root {
+            --gold: #FFD700;
+            --scarlet: #740001;
+            --dark-red: #3A0000;
+            --parchment: #F4EAD4;
+            --charcoal: #141414;
+            --card-bg: #1e1711;
+        }
+        
+        body { 
+            font-family: 'Georgia', serif; 
+            background-color: var(--charcoal); 
+            background-image: radial-gradient(circle at center, var(--dark-red) 0%, #0a0a0a 100%);
+            color: var(--parchment); 
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        .container { 
+            max-width: 650px; 
+            margin: 30px auto; 
+            border: 3px double var(--gold); 
+            padding: 25px; 
+            background: rgba(15, 10, 8, 0.95); 
+            position: relative; 
+            box-shadow: 0 0 25px rgba(116, 0, 1, 0.6), inset 0 0 15px rgba(0,0,0,0.8);
+            border-radius: 12px;
+        }
+        
+        .page { display: none; }
+        .active { display: block; animation: spellFade 0.4s ease-in-out; }
+        
+        @keyframes spellFade {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .summary-hud { 
+            background: linear-gradient(135deg, var(--scarlet) 0%, var(--dark-red) 100%); 
+            border: 2px solid var(--gold); 
+            padding: 15px; 
+            position: relative; 
+            min-height: 105px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            margin-bottom: 25px;
+            box-sizing: border-box;
+        }
+        .hud-left { width: 75%; display: inline-block; }
+        .hud-left h3 { margin: 0; color: var(--gold); text-shadow: 2px 2px #000; letter-spacing: 1px; font-size: 18px; }
+        .hud-metrics { display: flex; gap: 25px; font-size: 15px; margin-top: 10px; font-weight: bold; text-shadow: 1px 1px #000; align-items: center; }
+        
+        .hud-logout-trigger {
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--gold);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: bold;
+            opacity: 0.8;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .hud-logout-trigger:hover { opacity: 1; transform: scale(1.03); }
+
+        .clock-box { position: absolute; top: 18px; right: 15px; width: 85px; height: 85px; text-align: center; cursor: pointer; }
+        #analog-canvas { background: #1a1512; border: 2px solid var(--gold); border-radius: 50%; box-shadow: 0 0 8px var(--gold); }
+        #digital-clock { font-size: 11px; font-weight: bold; color: var(--gold); background: #000; padding: 5px 2px; border: 1px solid var(--gold); border-radius: 4px; box-shadow: 0 0 5px var(--gold); margin-top: 22px; }
+
+        .menu-stack { display: flex; flex-direction: column; gap: 14px; }
+        .menu-tab { 
+            border: 2px solid #3a2a1d; 
+            padding: 18px; 
+            background: linear-gradient(to right, var(--card-bg), #2d2117); 
+            text-align: left; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            color: var(--parchment);
+            border-radius: 6px;
+            box-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .menu-tab:hover { 
+            border-color: var(--gold); 
+            color: var(--gold);
+            transform: translateX(3px);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+        
+        .embedded-hud-icon { width: 24px; height: 24px; object-fit: contain; vertical-align: middle; border-radius: 4px; }
+        .embedded-nav-icon { width: 28px; height: 28px; object-fit: contain; }
+        .embedded-chest-badge { width: 20px; height: 20px; object-fit: contain; vertical-align: middle; margin-right: 4px; }
+        
+        .admin-keyhole { position: absolute; bottom: 12px; right: 15px; background: transparent; border: none; color: #443322; cursor: pointer; font-size: 16px; transition: color 0.3s; }
+        .admin-keyhole:hover { color: var(--gold); }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; color: var(--gold); font-weight: bold; font-size: 13px; letter-spacing: 0.5px; }
+        .form-group input, .form-group select { 
+            width: 100%; padding: 10px; box-sizing: border-box; background: #120d0a; color: #fff; 
+            border: 1px solid #5a4533; border-radius: 4px; font-family: monospace; font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--gold); outline: none; }
+        
+        .task-item { 
+            background: linear-gradient(135deg, var(--card-bg) 0%, #17110c 100%);
+            border: 1px solid #4a3b2c; padding: 14px; margin-bottom: 12px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-radius: 6px; box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            transition: border-color 0.3s;
+        }
+        .task-item:hover { border-color: #6e5640; }
+        .task-item.completed { opacity: 0.4; background: #0c1a0c; border-color: #1b4d1b; text-decoration: line-through; }
+        
+        .vocab-input-box { background: #16110d; padding: 16px; border: 1px dashed var(--gold); margin-bottom: 25px; border-radius: 6px; }
+        .scroll-log { max-height: 280px; overflow-y: auto; border: 1px solid #332211; padding: 12px; background: #0b0b0b; border-radius: 4px; }
+        .vocab-card { background: #18120e; padding: 14px; margin-bottom: 12px; border-left: 4px solid var(--scarlet); border-radius: 0 4px 4px 0; border-bottom: 1px solid #2d1f14; }
+        .vocab-timestamp { font-size: 11px; color: var(--gold); float: right; }
+
+        .quest-item-card { border: 2px dashed #3a2d20; padding: 16px; margin-bottom: 14px; background: #130f0b; filter: grayscale(100%); opacity: 0.4; border-radius: 6px; }
+        .quest-item-card.unlocked-achieved { border: 2px solid var(--gold); background: rgba(116,0,1,0.15); filter: grayscale(0%); opacity: 1; box-shadow: 0 0 10px rgba(255,215,0,0.15); }
+        .quest-status-badge { float: right; font-weight: bold; font-size: 12px; color: var(--gold); background: #000; padding: 2px 6px; border: 1px solid var(--gold); border-radius: 3px; }
+
+        .admin-repo-container { margin-top: 30px; border-top: 2px dashed var(--scarlet); padding-top: 20px; }
+        .repo-item { display: flex; align-items: center; background: #140f0c; padding: 12px; margin-bottom: 10px; border: 1px solid #3a2c1e; gap: 14px; border-radius: 4px; }
+        .repo-details { flex-grow: 1; font-size: 13px; }
+        
+        button.action-btn {
+            background: linear-gradient(to bottom, var(--scarlet) 0%, var(--dark-red) 100%);
+            color: var(--parchment); border: 1px solid var(--gold); padding: 12px; font-weight: bold;
+            font-size: 14px; font-family: 'Georgia', serif; border-radius: 6px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.4);
+            transition: transform 0.2s, filter 0.2s;
+        }
+        button.action-btn:hover { filter: brightness(1.2); transform: translateY(-1px); }
+        button.action-btn:active { transform: translateY(1px); }
+        
+        .eraser-btn { background: #5a0000 !important; border-color: #ff3333 !important; color: #ffcccc !important; width: 100%; margin-bottom: 15px;}
+        .eraser-btn:hover { background: #800000 !important; }
+        
+        .quest-alert-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 2000; }
+        .quest-alert-content { background: #1a120b; border: 3px double var(--gold); padding: 35px; text-align: center; max-width: 420px; border-radius: 10px; box-shadow: 0 0 35px var(--gold); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button class="admin-keyhole" onclick="accessAdminPanel()">🔑</button>
+
+    <div id="master-summary-hud" class="summary-hud" style="display: none;">
+        <div class="hud-left">
+            <h3 onclick="returnToHub()" style="cursor:pointer;">⚡ Gryffindor House Common Room ⚡</h3>
+            <div style="font-size: 11px; color: #dbcbb4; margin-top: 3px; font-style: italic;">Today's Date: <span id="hud-date">Date</span></div>
+            <div class="hud-metrics">
+                <span><img src="harry on broom.png" class="embedded-hud-icon" onerror="this.style.display='none'"> Streak: <span id="hud-streak">0</span> Days</span>
+                <span><img src="treasure chest.jpg" class="embedded-hud-icon" onerror="this.style.display='none'"> Treasure Chest: <span id="hud-coins">0</span> Galleons</span>
+            </div>
+            <div class="hud-logout-trigger" onclick="logoutAdiFromEngine()">[ 🏃‍♂️ Sign Out / Lock Room ]</div>
+        </div>
+        <div class="clock-box" onclick="toggleClockMode()">
+            <canvas id="analog-canvas" width="80" height="80" style="display: block;"></canvas>
+            <div id="digital-clock" style="display: none;">00:00:00</div>
+        </div>
+    </div>
+
+    <div id="page-login" class="page active">
+        <h1 style="text-align: center; margin-top: 30px; color: var(--gold); text-shadow: 2px 2px #000;">⚡ Welcome to Hogwarts ⚡</h1>
+        
+        <div style="text-align: center; margin: 25px 0;">
+            <img src="harry on broom.png" alt="Adi avatar" style="width: 110px; height: 110px; object-fit: contain; border: 2px double var(--gold); padding: 8px; border-radius: 50%; background: #000; box-shadow: 0 0 15px rgba(255,215,0,0.3);" onerror="this.style.display='none'">
+        </div>
+        
+        <p style="text-align: center; font-style: italic; color:#bba88f; margin-bottom: 30px;">"I solemnly swear that I am up to no good."</p>
+        <div style="max-width: 260px; margin: 0 auto;">
+            <button class="action-btn" onclick="loginAdi()" style="width: 100%; padding: 18px; font-size: 18px; letter-spacing: 0.5px;">Enter Common Room</button>
+        </div>
+    </div>
+
+    <div id="page-hub" class="page">
+        <div class="menu-stack">
+            <div class="menu-tab" onclick="navigateTo('page-challenges')"><span>🎯</span> Today's Challenges (<span id="hub-task-ratio">0/0</span>)</div>
+            <div class="menu-tab" onclick="navigateTo('page-quests')"><span>🏆</span> Quests Completed This Week</div>
+            <div class="menu-tab" onclick="navigateTo('page-vocabulary')"><span>📖</span> New Words I Learnt</div>
+            <div class="menu-tab" onclick="navigateTo('page-analytics')"><span>📊</span> How I Spent My Week</div>
+            <div class="menu-tab" onclick="navigateTo('page-rewards')">
+                <img src="treasure chest.jpg" class="embedded-nav-icon" onerror="this.style.display='none'"> Get My Rewards
+            </div>
+        </div>
+    </div>
+
+    <div id="page-challenges" class="page">
+        <h2 style="text-align: center; color: var(--gold); margin-top: 0;">🎯 Today's Active Challenges</h2>
+        <div style="text-align: center; font-weight: bold; margin-bottom: 20px; color: var(--parchment);" id="challenges-header-progress">0 out of 0 Tasks Completed</div>
+        <div id="task-container"></div>
+        <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:15px; background: #332215;">↩ Return to Common Room</button>
+    </div>
+
+    <div id="page-quests" class="page">
+        <h2 style="text-align: center; color: var(--gold); margin-top: 0;">🏆 Weekly House Quests</h2>
+        <p style="font-size: 12px; color:#bba88f; text-align:center; margin-bottom: 20px; font-style: italic;">
+            Fulfill specialized weekly goals. Reset occurs automatically every Monday morning!
+        </p>
+        <div id="quests-weekly-container"></div>
+        <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:15px; background: #332215;">↩ Return to Common Room</button>
+    </div>
+
+    <div id="page-vocabulary" class="page">
+        <h2 style="text-align: center; color: var(--gold); margin-top: 0;">📖 Spellbook Vocabulary Archive</h2>
+        <p style="font-size: 12px; color: #bba88f; margin-bottom: 20px; text-align: center; font-style: italic;">
+            This scroll collection is independent of weekly resets. Keep gathering words!
+        </p>
+        <div class="vocab-input-box">
+            <label>LOG NEW WORD ENCOUNTERED:</label>
+            <input type="text" id="vocab-input-field" placeholder="Type new word here and press Enter..." onkeydown="handleNewWordSubmission(event)">
+        </div>
+        <h3 style="color: var(--gold); border-bottom: 1px solid #4a3b2c; padding-bottom: 6px; font-size: 15px;">📜 Discovered Lexicon</h3>
+        <div class="scroll-log" id="vocab-archive-display"></div>
+        <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:25px; background: #332215;">↩ Return to Common Room</button>
+    </div>
+
+    <div id="page-analytics" class="page">
+        <h2 style="text-align: center; color: var(--gold); margin-top:0;">📊 Weekly Activity Allocation Map</h2>
+        <p style="font-size:12px; color:#bba88f; text-align:center; margin-bottom:20px; font-style: italic;">Proportional time distribution chart of assignments cleared this week.</p>
+        <div style="text-align:center; margin: 20px 0;">
+            <canvas id="analyticsPieCanvas" width="220" height="220"></canvas>
+        </div>
+        <div id="analytics-pie-legend"></div>
+        <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:25px; background: #332215;">↩ Return to Common Room</button>
+    </div>
+
+    <div id="page-rewards" class="page">
+        <h2 style="text-align: center; color: var(--gold); margin-top:0;">📦 Gringotts Treasure Chest</h2>
+        <p style="font-size: 12px; color: #bba88f; text-align: center; margin-bottom: 20px; font-style: italic;">Exchange your hard-earned Galleons for special rewards!</p>
+        <div id="rewards-container"></div>
+        <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:15px; background: #332215;">↩ Return to Common Room</button>
+    </div>
