@@ -9,7 +9,7 @@
     <style>
         :root { --gold: #FFD700; --scarlet: #740001; --dark-red: #3A0000; --parchment: #F4EAD4; --charcoal: #141414; --card-bg: #1e1711; }
         body { font-family: 'Georgia', serif; background-color: var(--charcoal); background-image: radial-gradient(circle at center, var(--dark-red) 0%, #0a0a0a 100%); color: var(--parchment); padding: 20px; margin: 0; min-height: 100vh; }
-        .container { max-width: 650px; margin: 30px auto; border: 3px double var(--gold); padding: 25px; background: rgba(15, 10, 8, 0.95); position: relative; border-radius: 12px; }
+        .container { max-width: 650px; margin: 30px auto; border: 3px double var(--gold); padding: 25px; background: rgba(15, 10, 8, 0.95); position: relative; box-shadow: 0 0 25px rgba(116, 0, 1, 0.6); border-radius: 12px; }
         .page { display: none; } .active { display: block; }
         .summary-hud { background: linear-gradient(135deg, var(--scarlet) 0%, var(--dark-red) 100%); border: 2px solid var(--gold); padding: 15px; border-radius: 8px; margin-bottom: 25px; }
         .menu-tab { border: 2px solid #3a2a1d; padding: 18px; background: #1e1711; margin-bottom: 10px; cursor: pointer; border-radius: 6px; font-weight: bold; }
@@ -17,17 +17,16 @@
         button.action-btn { background: var(--scarlet); color: var(--parchment); border: 1px solid var(--gold); padding: 12px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .task-item { background: #1e1711; border: 1px solid #4a3b2c; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
         .admin-keyhole { position: absolute; bottom: 10px; right: 10px; cursor: pointer; background: none; border: none; }
+        .quest-alert-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <button class="admin-keyhole" onclick="accessAdminPanel()">🔑</button>
-
     <div id="master-summary-hud" class="summary-hud" style="display: none;">
-        <h3 onclick="navigateTo('page-hub')" style="cursor:pointer; color:var(--gold);">⚡ Gryffindor Common Room ⚡</h3>
+        <h3>⚡ Gryffindor Common Room ⚡</h3>
         <p>Streak: <span id="hud-streak">0</span> | Galleons: <span id="hud-coins">0</span></p>
-        <div onclick="logoutAdiFromEngine()" style="cursor:pointer; font-size: 12px; color: var(--gold);">[ 🏃‍♂️ Sign Out ]</div>
     </div>
 
     <div id="page-login" class="page active">
@@ -45,18 +44,6 @@
     <div id="page-challenges" class="page">
         <h2>🎯 Today's Challenges</h2>
         <div id="task-container"></div>
-        <button class="action-btn" onclick="navigateTo('page-hub')">↩ Return</button>
-    </div>
-
-    <div id="page-quests" class="page">
-        <h2>🏆 Weekly Quests</h2>
-        <div id="quests-weekly-container"></div>
-        <button class="action-btn" onclick="navigateTo('page-hub')">↩ Return</button>
-    </div>
-
-    <div id="page-rewards" class="page">
-        <h2>📦 Treasure Chest</h2>
-        <div id="rewards-container"></div>
         <button class="action-btn" onclick="navigateTo('page-hub')">↩ Return</button>
     </div>
 
@@ -84,7 +71,7 @@
     const db = firebase.firestore();
     const docRef = db.collection("house_engine").doc("master_state");
 
-    let appData = { coins: 0, streak: 0, lastLoginNumericalKey: 0, tasks: [], quests: [], rewards: [] };
+    let appData = { coins: 0, streak: 0, lastLoginNumericalKey: 0, tasks: [] };
 
     docRef.onSnapshot((doc) => {
         if (doc.exists()) { appData = doc.data(); updateUI(); }
@@ -130,8 +117,6 @@
     }
 
     function accessAdminPanel() { if(prompt("Passcode:") === "1211") navigateTo('page-admin'); }
-    function exitAdmin() { navigateTo('page-hub'); }
-    function logoutAdiFromEngine() { navigateTo('page-login'); }
 </script>
 </body>
 </html>
