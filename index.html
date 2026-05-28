@@ -9,54 +9,51 @@
     <style>
         :root { --gold: #FFD700; --scarlet: #740001; --dark-red: #3A0000; --parchment: #F4EAD4; --charcoal: #141414; --card-bg: #1e1711; }
         body { font-family: 'Georgia', serif; background-color: var(--charcoal); background-image: radial-gradient(circle at center, var(--dark-red) 0%, #0a0a0a 100%); color: var(--parchment); padding: 20px; margin: 0; min-height: 100vh; }
-        .container { max-width: 650px; margin: 30px auto; border: 3px double var(--gold); padding: 25px; background: rgba(15, 10, 8, 0.95); position: relative; border-radius: 12px; }
-        .page { display: none; } .active { display: block; }
-        .summary-hud { background: linear-gradient(135deg, var(--scarlet) 0%, var(--dark-red) 100%); border: 2px solid var(--gold); padding: 15px; border-radius: 8px; margin-bottom: 25px; }
-        .menu-tab { border: 2px solid #3a2a1d; padding: 18px; background: #1e1711; margin-bottom: 10px; cursor: pointer; font-weight: bold; border-radius: 6px; }
+        .container { max-width: 650px; margin: 30px auto; border: 3px double var(--gold); padding: 25px; background: rgba(15, 10, 8, 0.95); position: relative; box-shadow: 0 0 25px rgba(116, 0, 1, 0.6), inset 0 0 15px rgba(0,0,0,0.8); border-radius: 12px; }
+        .page { display: none; } .active { display: block; animation: spellFade 0.4s ease-in-out; }
+        @keyframes spellFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .summary-hud { background: linear-gradient(135deg, var(--scarlet) 0%, var(--dark-red) 100%); border: 2px solid var(--gold); padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 25px; }
+        .menu-tab { border: 2px solid #3a2a1d; padding: 18px; background: linear-gradient(to right, var(--card-bg), #2d2117); margin-bottom: 14px; cursor: pointer; font-weight: bold; border-radius: 6px; }
         .menu-tab:hover { border-color: var(--gold); color: var(--gold); }
-        .action-btn { background: var(--scarlet); color: white; border: 1px solid var(--gold); padding: 12px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .action-btn { background: var(--scarlet); color: white; border: 1px solid var(--gold); padding: 12px; width: 100%; cursor: pointer; font-family: 'Georgia', serif; font-weight: bold; margin-top: 10px; }
         .task-item { background: #1e1711; border: 1px solid #4a3b2c; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .admin-keyhole { position: absolute; bottom: 10px; right: 10px; cursor: pointer; background: none; border: none; }
-        .vocab-card { background: #18120e; padding: 10px; margin-bottom: 8px; border-left: 4px solid var(--scarlet); }
+        .admin-keyhole { position: absolute; bottom: 12px; right: 15px; cursor: pointer; border: none; background: none; font-size: 16px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <button class="admin-keyhole" onclick="accessAdminPanel()">🔑</button>
+
     <div id="master-summary-hud" class="summary-hud" style="display: none;">
         <h3 onclick="navigateTo('page-hub')" style="cursor:pointer; color:var(--gold);">⚡ Gryffindor Common Room ⚡</h3>
         <p>Streak: <span id="hud-streak">0</span> | Galleons: <span id="hud-coins">0</span></p>
     </div>
 
-    <!-- Login Page -->
     <div id="page-login" class="page active">
-        <h1 style="text-align: center; color: var(--gold);">⚡ Welcome to Hogwarts ⚡</h1>
-        <img src="harry on broom.png" style="width:120px; display:block; margin: 20px auto;">
+        <h1 style="text-align:center; color:var(--gold);">⚡ Welcome to Hogwarts ⚡</h1>
         <button class="action-btn" onclick="loginAdi()">Enter Common Room</button>
     </div>
 
-    <!-- Main Hub -->
     <div id="page-hub" class="page">
         <div class="menu-tab" onclick="navigateTo('page-challenges')">🎯 Today's Challenges</div>
         <div class="menu-tab" onclick="navigateTo('page-quests')">🏆 Weekly Quests</div>
         <div class="menu-tab" onclick="navigateTo('page-vocabulary')">📖 Spellbook</div>
-        <div class="menu-tab" onclick="navigateTo('page-analytics')">📊 Analytics</div>
+        <div class="menu-tab" onclick="navigateTo('page-analytics')">📊 Weekly Analytics</div>
         <div class="menu-tab" onclick="navigateTo('page-rewards')">📦 Treasure Chest</div>
     </div>
 
-    <!-- Feature Pages -->
-    <div id="page-challenges" class="page"><h2>🎯 Challenges</h2><div id="task-container"></div><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
-    <div id="page-quests" class="page"><h2>🏆 Weekly Quests</h2><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
-    <div id="page-vocabulary" class="page"><h2>📖 Spellbook</h2><div id="vocab-archive-display"></div><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
-    <div id="page-analytics" class="page"><h2>📊 Analytics</h2><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
-    <div id="page-rewards" class="page"><h2>📦 Treasure Chest</h2><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
-
+    <div id="page-challenges" class="page"><h2>🎯 Today's Challenges</h2><div id="task-container"></div><button class="action-btn" onclick="navigateTo('page-hub')">↩ Return</button></div>
+    <div id="page-quests" class="page"><h2>🏆 Weekly Quests</h2><button class="action-btn" onclick="navigateTo('page-hub')">↩ Return</button></div>
+    <div id="page-vocabulary" class="page"><h2>📖 Spellbook</h2><button class="action-btn" onclick="navigateTo('page-hub')">↩ Return</button></div>
+    <div id="page-analytics" class="page"><h2>📊 Weekly Analytics</h2><button class="action-btn" onclick="navigateTo('page-hub')">↩ Return</button></div>
+    <div id="page-rewards" class="page"><h2>📦 Treasure Chest</h2><button class="action-btn" onclick="navigateTo('page-hub')">↩ Return</button></div>
+    
     <div id="page-admin" class="page">
         <h2>🛡️ Prefect Admin</h2>
         <input type="text" id="task-text" placeholder="Task Name" style="width:100%; padding:8px;">
         <button class="action-btn" onclick="handleAddTask()">Cast Task</button>
-        <button class="action-btn" onclick="navigateTo('page-hub')">Exit</button>
+        <button class="action-btn" onclick="navigateTo('page-hub')">↩ Exit</button>
     </div>
 </div>
 
@@ -73,11 +70,11 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const docRef = db.collection("house_engine").doc("master_state");
-    let appData = { coins: 0, streak: 0, tasks: [], vocabulary: [] };
+
+    let appData = { coins: 0, streak: 0, tasks: [] };
 
     docRef.onSnapshot((doc) => {
         if (doc.exists()) { appData = doc.data(); updateUI(); }
-        else { docRef.set(appData); }
     });
 
     function navigateTo(p) {
