@@ -4,55 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gryffindor Common Room Engine</title>
+    <link rel="apple-touch-icon" href="https://i.imgur.com/8Yv6ZUX.png">
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <link rel="apple-touch-icon" href="https://i.imgur.com/8Yv6ZUX.png">
     <style>
         :root { --gold: #FFD700; --scarlet: #740001; --dark-red: #3A0000; --parchment: #F4EAD4; --charcoal: #141414; --card-bg: #1e1711; }
         body { font-family: 'Georgia', serif; background-color: var(--charcoal); background-image: radial-gradient(circle at center, var(--dark-red) 0%, #0a0a0a 100%); color: var(--parchment); padding: 20px; margin: 0; min-height: 100vh; }
         .container { max-width: 650px; margin: 30px auto; border: 3px double var(--gold); padding: 25px; background: rgba(15, 10, 8, 0.95); position: relative; box-shadow: 0 0 25px rgba(116, 0, 1, 0.6), inset 0 0 15px rgba(0,0,0,0.8); border-radius: 12px; }
         .page { display: none; } .active { display: block; animation: spellFade 0.4s ease-in-out; }
         @keyframes spellFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        .summary-hud { background: linear-gradient(135deg, var(--scarlet) 0%, var(--dark-red) 100%); border: 2px solid var(--gold); padding: 15px; position: relative; min-height: 105px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 25px; box-sizing: border-box; }
-        .hud-logout-trigger { display: inline-block; margin-top: 12px; font-size: 12px; color: var(--gold); cursor: pointer; font-weight: bold; }
+        .summary-hud { background: linear-gradient(135deg, var(--scarlet) 0%, var(--dark-red) 100%); border: 2px solid var(--gold); padding: 15px; border-radius: 8px; margin-bottom: 25px; }
         .clock-box { position: absolute; top: 18px; right: 15px; width: 85px; height: 85px; cursor: pointer; }
         #analog-canvas { background: #1a1512; border: 2px solid var(--gold); border-radius: 50%; box-shadow: 0 0 8px var(--gold); }
         .menu-tab { border: 2px solid #3a2a1d; padding: 18px; background: linear-gradient(to right, var(--card-bg), #2d2117); margin-bottom: 14px; cursor: pointer; font-weight: bold; border-radius: 6px; }
-        .menu-tab:hover { border-color: var(--gold); color: var(--gold); }
-        .action-btn { background: linear-gradient(to bottom, var(--scarlet) 0%, var(--dark-red) 100%); color: var(--parchment); border: 1px solid var(--gold); padding: 12px; width: 100%; cursor: pointer; font-weight: bold; border-radius: 6px; }
-        .admin-keyhole { position: absolute; bottom: 12px; right: 15px; cursor: pointer; background: transparent; border: none; color: #443322; }
+        .action-btn { background: var(--scarlet); color: white; border: 1px solid var(--gold); padding: 12px; width: 100%; cursor: pointer; font-family: 'Georgia', serif; font-weight: bold; }
+        .task-item { background: #1e1711; border: 1px solid #4a3b2c; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .admin-keyhole { position: absolute; bottom: 12px; right: 15px; cursor: pointer; border: none; background: none; font-size: 16px; }
     </style>
 </head>
 <body>
-
 <div class="container">
     <button class="admin-keyhole" onclick="accessAdminPanel()">🔑</button>
-
     <div id="master-summary-hud" class="summary-hud" style="display: none;">
-        <div class="hud-left">
-            <h3 onclick="navigateTo('page-hub')" style="cursor:pointer; color:var(--gold);">⚡ Gryffindor Common Room ⚡</h3>
-            <p>Streak: <span id="hud-streak">0</span> | Galleons: <span id="hud-coins">0</span></p>
-            <div class="hud-logout-trigger" onclick="logoutAdiFromEngine()">[ 🏃‍♂️ Sign Out ]</div>
-        </div>
+        <h3 onclick="navigateTo('page-hub')" style="cursor:pointer; color:var(--gold);">⚡ Gryffindor Common Room ⚡</h3>
+        <p>Streak: <span id="hud-streak">0</span> | Galleons: <span id="hud-coins">0</span></p>
         <div class="clock-box"><canvas id="analog-canvas" width="80" height="80"></canvas></div>
     </div>
-
     <div id="page-login" class="page active">
-        <h1 style="text-align: center; color: var(--gold);">⚡ Welcome to Hogwarts ⚡</h1>
+        <h1 style="text-align:center; color:var(--gold);">⚡ Welcome to Hogwarts ⚡</h1>
         <p style="text-align:center; font-style: italic;">"I solemnly swear that I am up to no good."</p>
+        <img src="harry on broom.png" style="width:120px; display:block; margin: 20px auto;">
         <button class="action-btn" onclick="loginAdi()">Enter Common Room</button>
     </div>
-
     <div id="page-hub" class="page">
         <div class="menu-tab" onclick="navigateTo('page-challenges')">🎯 Today's Challenges</div>
         <div class="menu-tab" onclick="navigateTo('page-quests')">🏆 Weekly Quests</div>
         <div class="menu-tab" onclick="navigateTo('page-vocabulary')">📖 Spellbook</div>
+        <div class="menu-tab" onclick="navigateTo('page-analytics')">📊 Analytics</div>
         <div class="menu-tab" onclick="navigateTo('page-rewards')">📦 Treasure Chest</div>
     </div>
+    <div id="page-challenges" class="page"><h2>🎯 Challenges</h2><div id="task-container"></div><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
+    <div id="page-quests" class="page"><h2>🏆 Quests</h2><div id="quest-container"></div><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
+    <div id="page-vocabulary" class="page"><h2>📖 Spellbook</h2><input type="text" id="v-in"><button class="action-btn" onclick="addVocab()">Add</button><div id="v-list"></div><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
+    <div id="page-analytics" class="page"><h2>📊 Analytics</h2><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
+    <div id="page-rewards" class="page"><h2>📦 Treasure Chest</h2><button class="action-btn" onclick="navigateTo('page-hub')">Return</button></div>
+    <div id="page-admin" class="page">
+        <h2>🛡️ Prefect Admin</h2>
+        <input type="text" id="task-text" placeholder="Task">
+        <input type="number" id="task-points" placeholder="Points">
+        <button class="action-btn" onclick="handleAddTask()">Cast Task</button>
+        <button class="action-btn" onclick="navigateTo('page-hub')">Exit</button>
+    </div>
 </div>
-
 <script>
-    // 1. FIREBASE SETUP
     const firebaseConfig = {
         apiKey: "AIzaSyBXE-12Q8pM6_sTyfhYmMAiNhXgJV_R7Ck",
         authDomain: "adi-day-planner.firebaseapp.com",
@@ -61,44 +65,19 @@
         messagingSenderId: "582460179914",
         appId: "1:582460179914:web:53a7eae94028fdebf9bb33"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const docRef = db.collection("house_engine").doc("master_state");
-
-    // 2. DATA LAYER
     let appData = { coins: 0, streak: 0, tasks: [], vocabulary: [] };
-
-    // 3. SYNC ENGINE
-    docRef.onSnapshot((doc) => {
-        if (doc.exists()) { 
-            appData = doc.data(); 
-            updateUI(); 
-        }
-    });
-
+    docRef.onSnapshot((doc) => { if (doc.exists()) { appData = doc.data(); updateUI(); } else { docRef.set(appData); } });
     function save() { docRef.set(appData); }
-
-    // 4. YOUR ORIGINAL NAVIGATION LOGIC
-    function navigateTo(p) {
-        document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
-        document.getElementById(p).classList.add('active');
-        document.getElementById('master-summary-hud').style.display = (p === 'page-login' || p === 'page-admin') ? 'none' : 'block';
-    }
-
-    function loginAdi() {
-        appData.streak++;
-        save();
-        navigateTo('page-hub');
-    }
-
-    function updateUI() {
-        document.getElementById('hud-streak').innerText = appData.streak || 0;
-        document.getElementById('hud-coins').innerText = appData.coins || 0;
-    }
-
+    function navigateTo(p) { document.querySelectorAll('.page').forEach(e => e.classList.remove('active')); document.getElementById(p).classList.add('active'); document.getElementById('master-summary-hud').style.display = (p === 'page-login' || p === 'page-admin') ? 'none' : 'block'; }
+    function loginAdi() { appData.streak++; save(); navigateTo('page-hub'); }
+    function updateUI() { document.getElementById('hud-streak').innerText = appData.streak || 0; document.getElementById('hud-coins').innerText = appData.coins || 0; drawClock(); }
+    function drawClock() { const ctx = document.getElementById('analog-canvas').getContext('2d'); ctx.clearRect(0,0,80,80); ctx.beginPath(); ctx.arc(40,40,35,0,2*Math.PI); ctx.strokeStyle = '#FFD700'; ctx.stroke(); }
+    function addVocab() { const v = document.getElementById('v-in').value; appData.vocabulary.push(v); save(); document.getElementById('v-list').innerHTML += `<div>${v}</div>`; }
+    function handleAddTask() { appData.tasks.push({ text: document.getElementById('task-text').value }); save(); alert("Task cast!"); }
     function accessAdminPanel() { if(prompt("Passcode:") === "1211") navigateTo('page-admin'); }
-    function logoutAdiFromEngine() { navigateTo('page-login'); }
 </script>
 </body>
 </html>
