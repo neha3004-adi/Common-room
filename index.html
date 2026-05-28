@@ -188,13 +188,18 @@
         <div style="text-align: center; margin: 25px 0;">
             <img src="harry on broom.png" alt="Adi avatar" style="width: 110px; height: 110px; object-fit: contain; border: 2px double var(--gold); padding: 8px; border-radius: 50%; background: #000; box-shadow: 0 0 15px rgba(255,215,0,0.3);" onerror="this.style.display='none'">
         </div>
-        
-        <p style="text-align: center; font-style: italic; color:#bba88f; margin-bottom: 30px;">"I solemnly swear that I am up to no good."</p>
-        <div style="max-width: 260px; margin: 0 auto;">
-            <button class="action-btn" onclick="loginAdi()" style="width: 100%; padding: 18px; font-size: 18px; letter-spacing: 0.5px;">Enter Common Room</button>
-        </div>
-    </div>
-const firebaseConfig = {
+        <script>
+    const ADMIN_PASS = "1211";
+    let audioCtxInstance = null;
+    
+    function initAudioEngineEngine() {
+        if (!audioCtxInstance) { audioCtxInstance = new (window.AudioContext || window.webkitAudioContext)(); }
+    }
+
+    // ===================================================================
+    // MAKE SURE YOUR KEYS SIT EXACTLY LIKE THIS:
+    // ===================================================================
+    const firebaseConfig = {
         apiKey: "AIzaSyAxYourActualKeyHere...",
         authDomain: "adi-common-room.firebaseapp.com",
         projectId: "adi-common-room",
@@ -202,6 +207,20 @@ const firebaseConfig = {
         messagingSenderId: "123456789012",
         appId: "1:123456789012:web:abcdef123456"
     };
+    // ===================================================================
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const docRef = db.collection("house_engine").doc("master_state");
+
+    let appData = { coins: 0, streak: 0, lastLoginNumericalKey: 0, clockMode: 'analog', lastCompletedWeekNumber: 0, tasks: [], quests: [], rewards: [], vocabulary: [], completedHistoryLog: [] };
+        <p style="text-align: center; font-style: italic; color:#bba88f; margin-bottom: 30px;">"I solemnly swear that I am up to no good."</p>
+        <div style="max-width: 260px; margin: 0 auto;">
+            <button class="action-btn" onclick="loginAdi()" style="width: 100%; padding: 18px; font-size: 18px; letter-spacing: 0.5px;">Enter Common Room</button>
+        </div>
+    </div>
+
     <!-- VIEW 1: HUB MAIN MENU -->
     <div id="page-hub" class="page">
         <div class="menu-stack">
