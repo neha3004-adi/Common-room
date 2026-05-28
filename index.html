@@ -6,7 +6,6 @@
     <title>Gryffindor Common Room Engine</title>
     <link rel="apple-touch-icon" href="https://i.imgur.com/8Yv6ZUX.png">
     
-    <!-- LOAD FIREBASE CLOUD INFRASTRUCTURE CORE MODULES -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -20,141 +19,47 @@
             --card-bg: #1e1711;
         }
         
-        body { 
-            font-family: 'Georgia', serif; 
-            background-color: var(--charcoal); 
-            background-image: radial-gradient(circle at center, var(--dark-red) 0%, #0a0a0a 100%);
-            color: var(--parchment); 
-            padding: 20px;
-            margin: 0;
-            min-height: 100vh;
-        }
-        
-        .container { 
-            max-width: 650px; 
-            margin: 30px auto; 
-            border: 3px double var(--gold); 
-            padding: 25px; 
-            background: rgba(15, 10, 8, 0.95); 
-            position: relative; 
-            box-shadow: 0 0 25px rgba(116, 0, 1, 0.6), inset 0 0 15px rgba(0,0,0,0.8);
-            border-radius: 12px;
-        }
-        
+        body { font-family: 'Georgia', serif; background-color: var(--charcoal); background-image: radial-gradient(circle at center, var(--dark-red) 0%, #0a0a0a 100%); color: var(--parchment); padding: 20px; margin: 0; min-height: 100vh; }
+        .container { max-width: 650px; margin: 30px auto; border: 3px double var(--gold); padding: 25px; background: rgba(15, 10, 8, 0.95); position: relative; box-shadow: 0 0 25px rgba(116, 0, 1, 0.6), inset 0 0 15px rgba(0,0,0,0.8); border-radius: 12px; }
         .page { display: none; }
         .active { display: block; animation: spellFade 0.4s ease-in-out; }
-        
-        @keyframes spellFade {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .summary-hud { 
-            background: linear-gradient(135deg, var(--scarlet) 0%, var(--dark-red) 100%); 
-            border: 2px solid var(--gold); 
-            padding: 15px; 
-            position: relative; 
-            min-height: 105px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            margin-bottom: 25px;
-            box-sizing: border-box;
-        }
+        @keyframes spellFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .summary-hud { background: linear-gradient(135deg, var(--scarlet) 0%, var(--dark-red) 100%); border: 2px solid var(--gold); padding: 15px; position: relative; min-height: 105px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 25px; box-sizing: border-box; }
         .hud-left { width: 75%; display: inline-block; }
         .hud-left h3 { margin: 0; color: var(--gold); text-shadow: 2px 2px #000; letter-spacing: 1px; font-size: 18px; }
         .hud-metrics { display: flex; gap: 25px; font-size: 15px; margin-top: 10px; font-weight: bold; text-shadow: 1px 1px #000; align-items: center; }
-        
-        .hud-logout-trigger {
-            display: inline-block;
-            margin-top: 12px;
-            font-size: 12px;
-            color: var(--gold);
-            text-decoration: none;
-            cursor: pointer;
-            font-weight: bold;
-            opacity: 0.8;
-            transition: opacity 0.2s, transform 0.2s;
-        }
+        .hud-logout-trigger { display: inline-block; margin-top: 12px; font-size: 12px; color: var(--gold); text-decoration: none; cursor: pointer; font-weight: bold; opacity: 0.8; transition: opacity 0.2s, transform 0.2s; }
         .hud-logout-trigger:hover { opacity: 1; transform: scale(1.03); }
-
         .clock-box { position: absolute; top: 18px; right: 15px; width: 85px; height: 85px; text-align: center; cursor: pointer; }
         #analog-canvas { background: #1a1512; border: 2px solid var(--gold); border-radius: 50%; box-shadow: 0 0 8px var(--gold); }
         #digital-clock { font-size: 11px; font-weight: bold; color: var(--gold); background: #000; padding: 5px 2px; border: 1px solid var(--gold); border-radius: 4px; box-shadow: 0 0 5px var(--gold); margin-top: 22px; }
-
         .menu-stack { display: flex; flex-direction: column; gap: 14px; }
-        .menu-tab { 
-            border: 2px solid #3a2a1d; 
-            padding: 18px; 
-            background: linear-gradient(to right, var(--card-bg), #2d2117); 
-            text-align: left; 
-            font-size: 16px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            color: var(--parchment);
-            border-radius: 6px;
-            box-shadow: 3px 3px 6px rgba(0,0,0,0.4);
-            transition: all 0.25s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .menu-tab:hover { 
-            border-color: var(--gold); 
-            color: var(--gold);
-            transform: translateX(3px);
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
-        }
-        
+        .menu-tab { border: 2px solid #3a2a1d; padding: 18px; background: linear-gradient(to right, var(--card-bg), #2d2117); text-align: left; font-size: 16px; font-weight: bold; cursor: pointer; color: var(--parchment); border-radius: 6px; box-shadow: 3px 3px 6px rgba(0,0,0,0.4); transition: all 0.25s ease; display: flex; align-items: center; gap: 12px; }
+        .menu-tab:hover { border-color: var(--gold); color: var(--gold); transform: translateX(3px); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
         .embedded-hud-icon { width: 24px; height: 24px; object-fit: contain; vertical-align: middle; border-radius: 4px; }
         .embedded-nav-icon { width: 28px; height: 28px; object-fit: contain; }
         .embedded-chest-badge { width: 20px; height: 20px; object-fit: contain; vertical-align: middle; margin-right: 4px; }
-        
         .admin-keyhole { position: absolute; bottom: 12px; right: 15px; background: transparent; border: none; color: #443322; cursor: pointer; font-size: 16px; transition: color 0.3s; }
         .admin-keyhole:hover { color: var(--gold); }
-        
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 6px; color: var(--gold); font-weight: bold; font-size: 13px; letter-spacing: 0.5px; }
-        .form-group input, .form-group select { 
-            width: 100%; padding: 10px; box-sizing: border-box; background: #120d0a; color: #fff; 
-            border: 1px solid #5a4533; border-radius: 4px; font-family: monospace; font-size: 14px;
-        }
+        .form-group input, .form-group select { width: 100%; padding: 10px; box-sizing: border-box; background: #120d0a; color: #fff; border: 1px solid #5a4533; border-radius: 4px; font-family: monospace; font-size: 14px; }
         .form-group input:focus, .form-group select:focus { border-color: var(--gold); outline: none; }
-        
-        .task-item { 
-            background: linear-gradient(135deg, var(--card-bg) 0%, #17110c 100%);
-            border: 1px solid #4a3b2c; padding: 14px; margin-bottom: 12px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            border-radius: 6px; box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-            transition: border-color 0.3s;
-        }
-        .task-item:hover { border-color: #6e5640; }
+        .task-item { background: linear-gradient(135deg, var(--card-bg) 0%, #17110c 100%); border: 1px solid #4a3b2c; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 6px; box-shadow: 0 3px 6px rgba(0,0,0,0.3); transition: border-color 0.3s; }
         .task-item.completed { opacity: 0.4; background: #0c1a0c; border-color: #1b4d1b; text-decoration: line-through; }
-        
         .vocab-input-box { background: #16110d; padding: 16px; border: 1px dashed var(--gold); margin-bottom: 25px; border-radius: 6px; }
         .scroll-log { max-height: 280px; overflow-y: auto; border: 1px solid #332211; padding: 12px; background: #0b0b0b; border-radius: 4px; }
         .vocab-card { background: #18120e; padding: 14px; margin-bottom: 12px; border-left: 4px solid var(--scarlet); border-radius: 0 4px 4px 0; border-bottom: 1px solid #2d1f14; }
         .vocab-timestamp { font-size: 11px; color: var(--gold); float: right; }
-
         .quest-item-card { border: 2px dashed #3a2d20; padding: 16px; margin-bottom: 14px; background: #130f0b; filter: grayscale(100%); opacity: 0.4; border-radius: 6px; }
         .quest-item-card.unlocked-achieved { border: 2px solid var(--gold); background: rgba(116,0,1,0.15); filter: grayscale(0%); opacity: 1; box-shadow: 0 0 10px rgba(255,215,0,0.15); }
         .quest-status-badge { float: right; font-weight: bold; font-size: 12px; color: var(--gold); background: #000; padding: 2px 6px; border: 1px solid var(--gold); border-radius: 3px; }
-
         .admin-repo-container { margin-top: 30px; border-top: 2px dashed var(--scarlet); padding-top: 20px; }
         .repo-item { display: flex; align-items: center; background: #140f0c; padding: 12px; margin-bottom: 10px; border: 1px solid #3a2c1e; gap: 14px; border-radius: 4px; }
         .repo-details { flex-grow: 1; font-size: 13px; }
-        
-        button.action-btn {
-            background: linear-gradient(to bottom, var(--scarlet) 0%, var(--dark-red) 100%);
-            color: var(--parchment); border: 1px solid var(--gold); padding: 12px; font-weight: bold;
-            font-size: 14px; font-family: 'Georgia', serif; border-radius: 6px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.4);
-            transition: transform 0.2s, filter 0.2s;
-        }
+        button.action-btn { background: linear-gradient(to bottom, var(--scarlet) 0%, var(--dark-red) 100%); color: var(--parchment); border: 1px solid var(--gold); padding: 12px; font-weight: bold; font-size: 14px; font-family: 'Georgia', serif; border-radius: 6px; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.4); transition: transform 0.2s, filter 0.2s; }
         button.action-btn:hover { filter: brightness(1.2); transform: translateY(-1px); }
-        button.action-btn:active { transform: translateY(1px); }
-        
         .eraser-btn { background: #5a0000 !important; border-color: #ff3333 !important; color: #ffcccc !important; width: 100%; margin-bottom: 15px;}
-        .eraser-btn:hover { background: #800000 !important; }
-        
         .quest-alert-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 2000; }
         .quest-alert-content { background: #1a120b; border: 3px double var(--gold); padding: 35px; text-align: center; max-width: 420px; border-radius: 10px; box-shadow: 0 0 35px var(--gold); }
     </style>
@@ -164,7 +69,6 @@
 <div class="container">
     <button class="admin-keyhole" onclick="accessAdminPanel()">🔑</button>
 
-    <!-- STATUS DASHBOARD HEADER HUD -->
     <div id="master-summary-hud" class="summary-hud" style="display: none;">
         <div class="hud-left">
             <h3 onclick="returnToHub()" style="cursor:pointer;">⚡ Gryffindor House Common Room ⚡</h3>
@@ -181,47 +85,17 @@
         </div>
     </div>
 
-    <!-- VIEW 0: PLATFORM GATEWAY LOGIN -->
     <div id="page-login" class="page active">
         <h1 style="text-align: center; margin-top: 30px; color: var(--gold); text-shadow: 2px 2px #000;">⚡ Welcome to Hogwarts ⚡</h1>
-        
         <div style="text-align: center; margin: 25px 0;">
             <img src="harry on broom.png" alt="Adi avatar" style="width: 110px; height: 110px; object-fit: contain; border: 2px double var(--gold); padding: 8px; border-radius: 50%; background: #000; box-shadow: 0 0 15px rgba(255,215,0,0.3);" onerror="this.style.display='none'">
         </div>
-        <script>
-    const ADMIN_PASS = "1211";
-    let audioCtxInstance = null;
-    
-    function initAudioEngineEngine() {
-        if (!audioCtxInstance) { audioCtxInstance = new (window.AudioContext || window.webkitAudioContext)(); }
-    }
-
-    // ===================================================================
-    // MAKE SURE YOUR KEYS SIT EXACTLY LIKE THIS:
-    // ===================================================================
-    const firebaseConfig = {
-        apiKey: "AIzaSyAxYourActualKeyHere...",
-        authDomain: "adi-common-room.firebaseapp.com",
-        projectId: "adi-common-room",
-        storageBucket: "adi-common-room.appspot.com",
-        messagingSenderId: "123456789012",
-        appId: "1:123456789012:web:abcdef123456"
-    };
-    // ===================================================================
-
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const docRef = db.collection("house_engine").doc("master_state");
-
-    let appData = { coins: 0, streak: 0, lastLoginNumericalKey: 0, clockMode: 'analog', lastCompletedWeekNumber: 0, tasks: [], quests: [], rewards: [], vocabulary: [], completedHistoryLog: [] };
         <p style="text-align: center; font-style: italic; color:#bba88f; margin-bottom: 30px;">"I solemnly swear that I am up to no good."</p>
         <div style="max-width: 260px; margin: 0 auto;">
             <button class="action-btn" onclick="loginAdi()" style="width: 100%; padding: 18px; font-size: 18px; letter-spacing: 0.5px;">Enter Common Room</button>
         </div>
     </div>
 
-    <!-- VIEW 1: HUB MAIN MENU -->
     <div id="page-hub" class="page">
         <div class="menu-stack">
             <div class="menu-tab" onclick="navigateTo('page-challenges')"><span>🎯</span> Today's Challenges (<span id="hub-task-ratio">0/0</span>)</div>
@@ -234,7 +108,6 @@
         </div>
     </div>
 
-    <!-- VIEW 2: CHALLENGES CHECKLIST -->
     <div id="page-challenges" class="page">
         <h2 style="text-align: center; color: var(--gold); margin-top: 0;">🎯 Today's Active Challenges</h2>
         <div style="text-align: center; font-weight: bold; margin-bottom: 20px; color: var(--parchment);" id="challenges-header-progress">0 out of 0 Tasks Completed</div>
@@ -242,22 +115,15 @@
         <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:15px; background: #332215;">↩ Return to Common Room</button>
     </div>
 
-    <!-- VIEW 3: WEEKLY QUESTS LOG -->
     <div id="page-quests" class="page">
         <h2 style="text-align: center; color: var(--gold); margin-top: 0;">🏆 Weekly House Quests</h2>
-        <p style="font-size: 12px; color:#bba88f; text-align:center; margin-bottom: 20px; font-style: italic;">
-            Fulfill specialized weekly goals. Reset occurs automatically every Monday morning!
-        </p>
+        <p style="font-size: 12px; color:#bba88f; text-align:center; margin-bottom: 20px; font-style: italic;">Fulfill specialized weekly goals.</p>
         <div id="quests-weekly-container"></div>
         <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:15px; background: #332215;">↩ Return to Common Room</button>
     </div>
 
-    <!-- VIEW 4: PERMANENT VOCABULARY SCROLL JOURNAL -->
     <div id="page-vocabulary" class="page">
         <h2 style="text-align: center; color: var(--gold); margin-top: 0;">📖 Spellbook Vocabulary Archive</h2>
-        <p style="font-size: 12px; color: #bba88f; margin-bottom: 20px; text-align: center; font-style: italic;">
-            This scroll collection is independent of weekly resets. Keep gathering words!
-        </p>
         <div class="vocab-input-box">
             <label>LOG NEW WORD ENCOUNTERED:</label>
             <input type="text" id="vocab-input-field" placeholder="Type new word here and press Enter..." onkeydown="handleNewWordSubmission(event)">
@@ -267,10 +133,8 @@
         <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:25px; background: #332215;">↩ Return to Common Room</button>
     </div>
 
-    <!-- VIEW 5: DYNAMIC PIE CANVAS ANALYTICS -->
     <div id="page-analytics" class="page">
         <h2 style="text-align: center; color: var(--gold); margin-top:0;">📊 Weekly Activity Allocation Map</h2>
-        <p style="font-size:12px; color:#bba88f; text-align:center; margin-bottom:20px; font-style: italic;">Proportional time distribution chart of assignments cleared this week.</p>
         <div style="text-align:center; margin: 20px 0;">
             <canvas id="analyticsPieCanvas" width="220" height="220"></canvas>
         </div>
@@ -278,15 +142,12 @@
         <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:25px; background: #332215;">↩ Return to Common Room</button>
     </div>
 
-    <!-- VIEW 6: REWARDS TREASURE VAULT -->
     <div id="page-rewards" class="page">
         <h2 style="text-align: center; color: var(--gold); margin-top:0;">📦 Gringotts Treasure Chest</h2>
-        <p style="font-size: 12px; color: #bba88f; text-align: center; margin-bottom: 20px; font-style: italic;">Exchange your hard-earned Galleons for special rewards!</p>
         <div id="rewards-container"></div>
         <button class="action-btn" onclick="navigateTo('page-hub')" style="width:100%; margin-top:15px; background: #332215;">↩ Return to Common Room</button>
     </div>
     
-    <!-- VIEW 7: PREFECT MASTER ADMINISTRATION PANELS -->
     <div id="page-admin" class="page">
         <h2 style="color: #ff4444; text-align: center; margin-top:0; font-size: 20px; letter-spacing:0.5px;">🛡️ Ministry Prefect Admin Control Room</h2>
         <div style="margin-bottom: 20px; text-align: center; border-bottom:1px solid #3a2b1d; padding-bottom:12px;">
@@ -295,59 +156,45 @@
             <label style="margin-right: 15px; cursor:pointer;"><input type="radio" name="admin-mode" value="reward" onchange="toggleAdminForm()"> Forge Reward</label>
             <label style="cursor:pointer;"><input type="radio" name="admin-mode" value="streak" onchange="toggleAdminForm()"> Core Tweaks</label>
         </div>
-        
         <form id="form-add-task" onsubmit="handleAddTask(event)">
-            <div class="form-group"><label>TASK MISSION TITLE:</label><input type="text" id="task-text" required placeholder="e.g. Completing geometry exercises"></div>
-            <div class="form-group" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="form-group"><label>TASK MISSION TITLE:</label><input type="text" id="task-text" required></div>
+            <div class="form-group" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
                 <div><label>CATEGORY GROUP:</label>
                     <select id="task-category">
-                        <option value="Study">Study</option><option value="Reading">Reading</option>
-                        <option value="Park">Park</option><option value="Indoor play">Indoor play</option>
-                        <option value="TV">TV</option><option value="Guitar">Guitar</option>
-                        <option value="Drawing">Drawing</option><option value="Lego building">Lego building</option>
-                        <option value="Eating">Eating</option><option value="Sleeping">Sleeping</option>
-                        <option value="Out on a drive">Out on a drive</option>
+                        <option value="Study">Study</option><option value="Reading">Reading</option><option value="Park">Park</option><option value="Indoor play">Indoor play</option><option value="TV">TV</option><option value="Guitar">Guitar</option><option value="Drawing">Drawing</option><option value="Lego building">Lego building</option><option value="Eating">Eating</option><option value="Sleeping">Sleeping</option><option value="Out on a drive">Out on a drive</option>
                     </select>
                 </div>
                 <div><label>CUTOFF HOUR:</label><input type="time" id="task-time" required></div>
-                <div><label>TARGET POINT BALANCES:</label><input type="number" id="task-points" required min="10"></div>
+                <div><label>POINTS:</label><input type="number" id="task-points" required min="10"></div>
             </div>
-            <!-- Added Remote Target Scheduling Field Asset -->
-            <div class="form-group"><label>SCHEDULE FOR TARGET CALENDAR DATE:</label><input type="date" id="task-sched-date" required></div>
+            <div class="form-group"><label>SCHEDULE FOR:</label><input type="date" id="task-sched-date" required></div>
             <button type="submit" class="action-btn" style="width:100%; background: #1c331c; border-color: #33cc33;">Cast Task Onto Board</button>
         </form>
-        
         <form id="form-add-quest" onsubmit="handleAddTaskQuest(event)" style="display: none;">
-            <div class="form-group"><label>QUEST MILESTONE GOAL TITLE:</label><input type="text" id="quest-text" required placeholder="e.g. Complete 3 Study items this week"></div>
+            <div class="form-group"><label>QUEST TITLE:</label><input type="text" id="quest-text" required></div>
             <div class="form-group" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
-                <div><label>TARGET CATEGORY MATCH:</label>
+                <div><label>CATEGORY:</label>
                     <select id="quest-category">
-                        <option value="Vocabulary">Vocabulary Tracker</option><option value="Study">Study</option><option value="Reading">Reading</option><option value="Park">Park</option><option value="Indoor play">Indoor play</option><option value="TV">TV</option><option value="Guitar">Guitar</option><option value="Drawing">Drawing</option><option value="Lego building">Lego building</option><option value="Eating">Eating</option><option value="Sleeping">Sleeping</option><option value="Out on a drive">Out on a drive</option>
+                        <option value="Vocabulary">Vocabulary</option><option value="Study">Study</option><option value="Reading">Reading</option><option value="Park">Park</option><option value="Indoor play">Indoor play</option><option value="TV">TV</option><option value="Guitar">Guitar</option><option value="Drawing">Drawing</option><option value="Lego building">Lego building</option>
                     </select>
                 </div>
-                <div><label>REQUIRED FREQUENCY TALLY:</label><input type="number" id="quest-count" required min="1" placeholder="3"></div>
-                <div><label>BONUS PAYOUT SUM:</label><input type="number" id="quest-reward" required min="50" placeholder="1000"></div>
+                <div><label>REQUIRED:</label><input type="number" id="quest-count" required min="1"></div>
+                <div><label>REWARD:</label><input type="number" id="quest-reward" required min="50"></div>
             </div>
             <button type="submit" class="action-btn" style="width:100%; background: #33331c; border-color: #cccc33;">Cast Long-Term Quest</button>
         </form>
-        
         <form id="form-add-reward" onsubmit="handleAddTaskReward(event)" style="display: none;">
-            <div class="form-group"><label>REWARD PRIZE ASSET DESCRIPTION TITLE:</label><input type="text" id="reward-text" required placeholder="e.g. 30 Mins Extra Playtime"></div>
-            <div class="form-group"><label>CHEST DEDUCTION PRICE FEE:</label><input type="number" id="reward-cost" required min="10"></div>
+            <div class="form-group"><label>REWARD TITLE:</label><input type="text" id="reward-text" required></div>
+            <div class="form-group"><label>COST:</label><input type="number" id="reward-cost" required min="10"></div>
             <button type="submit" class="action-btn" style="width:100%; background: #1c1c33; border-color: #3333cc;">Secure Reward To Vault</button>
         </form>
-
         <form id="form-edit-streak" onsubmit="handleOverrideStreakValue(event)" style="display: none;">
-            <div class="form-group">
-                <label>OVERRIDE CURRENT STREAK COUNT:</label>
-                <input type="number" id="admin-streak-field" required min="0" placeholder="e.g. 5">
-            </div>
+            <div class="form-group"><label>OVERRIDE STREAK:</label><input type="number" id="admin-streak-field" required min="0"></div>
             <button type="submit" class="action-btn" style="width:100%; background: #3a2211; border-color: var(--gold);">Cast Streak Override Spell</button>
         </form>
-        
         <div class="admin-repo-container" id="admin-inventory-section">
             <h3 id="repo-header-title" style="color:var(--gold); margin-top:0; font-size:15px; letter-spacing:0.5px;">Live Inventory</h3>
-            <button type="button" class="action-btn eraser-btn" onclick="executeSelectedEraserSpell()">⚡ Evanesco (Delete Selected Items)</button>
+            <button type="button" class="action-btn eraser-btn" onclick="executeSelectedEraserSpell()">⚡ Evanesco (Delete Selected)</button>
             <div id="admin-live-repo-list"></div>
         </div>
         <button class="action-btn" onclick="exitAdmin()" style="width:100%; margin-top:25px; background: #2b221a; border-color: #6e5640;">↩ Exit Prefect Portal</button>
@@ -358,43 +205,35 @@
     <div class="quest-alert-content">
         <div style="margin-bottom: 12px;"><img src="treasure chest.jpg" style="width:70px; height:70px; object-fit:contain; border-radius:6px;" onerror="this.style.display='none'"></div>
         <h2 style="color: var(--gold); margin-top:0; letter-spacing:1px; font-size:20px;">🏆 HOUSE CUP GLORY! 🏆</h2>
-        <p style="font-size: 15px; color:#fff; line-height:1.5;" id="quest-alert-text">Weekly milestone goal cleared!</p>
+        <p style="font-size: 15px; color:#fff; line-height:1.5;" id="quest-alert-text"></p>
         <h1 style="color: var(--gold); font-size: 44px; margin: 18px 0; text-shadow:2px 2px #000;" id="quest-alert-payout">+0</h1>
-        <p style="color: #bba88f; font-size: 11px; font-style: italic; margin-bottom:20px;">The Galleons have been transferred straight to your Gringotts Treasure Chest ledger.</p>
         <button class="action-btn" onclick="closeQuestNotificationModal()" style="padding: 10px 25px;">Secure Payout Merits</button>
     </div>
 </div>
 
 <script>
     const ADMIN_PASS = "1211";
-    let audioCtxInstance = null;
     
-    // ===================================================================
-    // 🔥 PASTE YOUR FIREBASE CONFIG OBJECT HERE (FROM STEP 1)
-    // ===================================================================
-    const firebaseConfig = const firebaseConfig = {
-  apiKey: "AIzaSy...",
-  authDomain: "adi-common-room.firebaseapp.com",
-  projectId: "adi-common-room",
-  storageBucket: "adi-common-room.appspot.com",
-  messagingSenderId: "...",
-  appId: "..."
-};
-    // ===================================================================
+    // FIREBASE CONFIGURATION
+    const firebaseConfig = {
+        apiKey: "AIzaSyBXE-12Q8pM6_sTyfhYmMAiNhXgJV_R7Ck",
+        authDomain: "adi-day-planner.firebaseapp.com",
+        projectId: "adi-day-planner",
+        storageBucket: "adi-day-planner.firebasestorage.app",
+        messagingSenderId: "582460179914",
+        appId: "1:582460179914:web:53a7eae94028fdebf9bb33"
+    };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const docRef = db.collection("house_engine").doc("master_state");
 
     let appData = { coins: 0, streak: 0, lastLoginNumericalKey: 0, clockMode: 'analog', lastCompletedWeekNumber: 0, tasks: [], quests: [], rewards: [], vocabulary: [], completedHistoryLog: [] };
 
-    // SET UP REAL-TIME CLOUD STREAM LISTENER ENGINE
     docRef.onSnapshot((doc) => {
         if (doc.exists()) {
             appData = doc.data();
             updateHubTrackers();
-            // Automatically refresh views if they are open on screen
             if(document.getElementById('page-challenges').classList.contains('active')) renderTasks();
             if(document.getElementById('page-quests').classList.contains('active')) renderQuestsView();
             if(document.getElementById('page-rewards').classList.contains('active')) renderRewardsVaultView();
@@ -402,312 +241,124 @@
             if(document.getElementById('page-analytics').classList.contains('active')) drawAllocationPieGraphicChart();
             if(document.getElementById('page-admin').classList.contains('active')) syncAdminRepositoryList();
         } else {
-            // Seed base configuration schema into empty database
             docRef.set(appData);
         }
-    }, (error) => { console.error("Database connection failure:", error); });
+    });
 
-    function saveEngineState() {
-        docRef.set(appData).catch((e) => console.error("Cloud push failed:", e));
+    function saveEngineState() { docRef.set(appData); }
+
+    // SOUNDS
+    let audioCtxInstance = null;
+    function initAudio() { if (!audioCtxInstance) audioCtxInstance = new (window.AudioContext || window.webkitAudioContext)(); }
+    function playSound(freqs) {
+        initAudio(); const now = audioCtxInstance.currentTime;
+        freqs.forEach((f, i) => {
+            const o = audioCtxInstance.createOscillator(), g = audioCtxInstance.createGain();
+            o.frequency.setValueAtTime(f, now + (i * 0.1));
+            g.gain.setValueAtTime(0.2, now + (i * 0.1));
+            g.gain.exponentialRampToValueAtTime(0.001, now + (i * 0.1) + 0.3);
+            o.connect(g); g.connect(audioCtxInstance.destination);
+            o.start(now + (i * 0.1)); o.stop(now + (i * 0.1) + 0.3);
+        });
     }
 
-    function initAudioEngineEngine() {
-        if (!audioCtxInstance) { audioCtxInstance = new (window.AudioContext || window.webkitAudioContext)(); }
+    // UTILS
+    function getISOWeekNum(d) {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+        return Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(),0,1)))/86400000) + 1)/7);
     }
+    function getFormattedLocalDateString(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+    function formatTime12Hour(t) { let [h, m] = t.split(':'); return `${h%12||12}:${m} ${h>=12?'PM':'AM'}`; }
 
-    function playTaskClinkChime() {
-        try {
-            initAudioEngineEngine(); const now = audioCtxInstance.currentTime;
-            const osc1 = audioCtxInstance.createOscillator(); const gain1 = audioCtxInstance.createGain();
-            osc1.type = 'sine'; osc1.frequency.setValueAtTime(987.77, now);
-            gain1.gain.setValueAtTime(0.15, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-            osc1.connect(gain1); gain1.connect(audioCtxInstance.destination); osc1.start(now); osc1.stop(now + 0.12);
-
-            const osc2 = audioCtxInstance.createOscillator(); const gain2 = audioCtxInstance.createGain();
-            osc2.type = 'sine'; osc2.frequency.setValueAtTime(1318.51, now + 0.05);
-            gain2.gain.setValueAtTime(0.12, now + 0.05); gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-            osc2.connect(gain2); gain2.connect(audioCtxInstance.destination); osc2.start(now + 0.05); osc2.stop(now + 0.25);
-        } catch(e) {}
+    // LOGIN
+    function navigateTo(p) {
+        document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+        document.getElementById(p).classList.add('active');
+        document.getElementById('master-summary-hud').style.display = (p === 'page-login' || p === 'page-admin') ? 'none' : 'block';
+        if(p === 'page-hub') updateHubTrackers();
+        if(p === 'page-challenges') renderTasks();
+        if(p === 'page-quests') renderQuestsView();
+        if(p === 'page-rewards') renderRewardsVaultView();
+        if(p === 'page-vocabulary') renderVocabularyArchive();
+        if(p === 'page-analytics') drawAllocationPieGraphicChart();
+        if(p === 'page-admin') { document.getElementById('admin-streak-field').value = appData.streak; syncAdminRepositoryList(); }
     }
-
-    function playQuestFanfareChime() {
-        try {
-            initAudioEngineEngine(); const now = audioCtxInstance.currentTime;
-            const sequenceNotes = [523.25, 659.25, 783.99, 1046.50];
-            sequenceNotes.forEach((freq, idx) => {
-                const osc = audioCtxInstance.createOscillator(); const gain = audioCtxInstance.createGain();
-                const startTime = now + (idx * 0.09);
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, startTime);
-                gain.gain.setValueAtTime(0.15, startTime); gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
-                osc.connect(gain); gain.connect(audioCtxInstance.destination); osc.start(startTime); osc.stop(startTime + 0.35);
-            });
-        } catch(e) {}
-    }
-
-    function getISOWeekNum(date) {
-        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-        const dayNum = d.getUTCDay() || 7; d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-        const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-    }
-
-    function getFormattedLocalDateString(date) {
-        return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
-    }
-
-    function navigateTo(pageId) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
-        const showHUD = (pageId !== 'page-login' && pageId !== 'page-admin');
-        document.getElementById('master-summary-hud').style.display = showHUD ? 'block' : 'none';
-        if(pageId === 'page-hub') updateHubTrackers();
-        if(pageId === 'page-challenges') renderTasks();
-        if(pageId === 'page-quests') renderQuestsView();
-        if(pageId === 'page-rewards') renderRewardsVaultView();
-        if(pageId === 'page-vocabulary') renderVocabularyArchive();
-        if(pageId === 'page-analytics') drawAllocationPieGraphicChart();
-        if(pageId === 'page-admin') {
-            document.getElementById('admin-streak-field').value = appData.streak || 0;
-            document.getElementById('task-sched-date').value = getFormattedLocalDateString(new Date());
-            syncAdminRepositoryList();
-        }
-    }
-
     function returnToHub() { if(appData.lastLoginNumericalKey) navigateTo('page-hub'); }
-
     function loginAdi() {
-        initAudioEngineEngine();
-        const now = new Date(); 
-        document.getElementById('hud-date').innerText = now.toDateString();
-        const trackingWeek = getISOWeekNum(now);
-        const dateKeyInteger = (now.getFullYear() * 10000) + ((now.getMonth() + 1) * 100) + now.getDate();
-
-        if (appData.lastCompletedWeekNumber && appData.lastCompletedWeekNumber !== trackingWeek) {
-            appData.completedHistoryLog = [];
-            if(appData.quests) appData.quests.forEach(q => { q.completed = false; });
-            if(appData.vocabulary) { appData.vocabulary.forEach(v => { v.weeklyTrackingMarker = "historical"; }); }
-            alert("Notice: A new week has dawned! Your weekly activity charts and quests have reset.");
-        }
-        
-        appData.lastCompletedWeekNumber = trackingWeek;
-
-        if (appData.lastLoginNumericalKey !== dateKeyInteger) {
-            appData.streak = (appData.streak || 0) + 1;
-            appData.lastLoginNumericalKey = dateKeyInteger; 
-        }
-        
-        saveEngineState(); updateHubTrackers(); navigateTo('page-hub');
+        initAudio(); const n = new Date(); document.getElementById('hud-date').innerText = n.toDateString();
+        const k = (n.getFullYear()*10000) + ((n.getMonth()+1)*100) + n.getDate();
+        if (appData.lastLoginNumericalKey !== k) { appData.streak++; appData.lastLoginNumericalKey = k; }
+        saveEngineState(); navigateTo('page-hub');
     }
-
-    function logoutAdiFromEngine() { saveEngineState(); navigateTo('page-login'); }
-
+    function logoutAdiFromEngine() { navigateTo('page-login'); }
+    
+    // UI UPDATES
     function updateHubTrackers() {
-        document.getElementById('hud-coins').innerText = appData.coins || 0; 
+        document.getElementById('hud-coins').innerText = appData.coins || 0;
         document.getElementById('hud-streak').innerText = appData.streak || 0;
-        
-        const todayStr = getFormattedLocalDateString(new Date());
-        const dayTasks = (appData.tasks || []).filter(t => t.scheduledDate === todayStr);
-        const total = dayTasks.length;
-        const done = dayTasks.filter(t => t.completed).length;
-        
-        document.getElementById('hub-task-ratio').innerText = `${done}/${total}`;
-        document.getElementById('challenges-header-progress').innerText = `${done} out of ${total} Tasks Completed`;
+        const tasks = (appData.tasks || []).filter(t => t.scheduledDate === getFormattedLocalDateString(new Date()));
+        document.getElementById('hub-task-ratio').innerText = `${tasks.filter(t=>t.completed).length}/${tasks.length}`;
+        document.getElementById('challenges-header-progress').innerText = `${tasks.filter(t=>t.completed).length} out of ${tasks.length} Tasks Completed`;
     }
-
+    
     function renderTasks() {
-        const box = document.getElementById('task-container'); box.innerHTML = "";
-        const todayStr = getFormattedLocalDateString(new Date());
-        const dayTasks = (appData.tasks || []).filter(t => t.scheduledDate === todayStr);
-
-        if(dayTasks.length === 0) { box.innerHTML = "<p style='color:#776655; text-align:center; font-style:italic; padding:15px;'>Notice board challenges are empty for today.</p>"; return; }
-        dayTasks.forEach(task => {
-            box.innerHTML += `
-                <div class="task-item ${task.completed ? 'completed' : ''}">
-                    <div>
-                        <span style="font-size:10px; background:var(--scarlet); padding:3px 6px; color:var(--gold); border:1px solid var(--gold); border-radius:3px; font-weight:bold;">${task.category.toUpperCase()}</span>
-                        <strong style="color:#fff; margin-left:8px; font-size:15px;">${task.text}</strong><br>
-                        <span style="font-size:12px; color:#cbb89f; display:inline-block; margin-top:5px;">Cutoff: ${formatTime12Hour(task.time)} | Reward: 🪙 ${task.targetPoints}</span>
-                    </div>
-                    <div><input type="checkbox" ${task.completed ? 'checked disabled' : ''} style="width:22px; height:22px; cursor:pointer; accent-color:var(--gold);" onchange="completeTaskAction(${task.id})"></div>
-                </div>`;
+        const b = document.getElementById('task-container'); b.innerHTML = "";
+        (appData.tasks || []).filter(t=>t.scheduledDate === getFormattedLocalDateString(new Date())).forEach(t => {
+            b.innerHTML += `<div class="task-item ${t.completed ? 'completed':''}"><div><b>${t.text}</b><br><small>Reward: ${t.targetPoints}</small></div><input type="checkbox" ${t.completed?'checked disabled':''} onchange="completeTaskAction(${t.id})"></div>`;
         });
     }
-
     function completeTaskAction(id) {
-        const task = appData.tasks.find(t => t.id === id); if(!task || task.completed) return;
-        task.completed = true; appData.coins += task.targetPoints;
+        const t = appData.tasks.find(x => x.id === id); t.completed = true; appData.coins += t.targetPoints;
         if(!appData.completedHistoryLog) appData.completedHistoryLog = [];
-        appData.completedHistoryLog.push({ category: task.category, timestamp: new Date().toISOString() });
-        playTaskClinkChime();
-        evaluateQuestMilestonesInstantWatcher();
-        saveEngineState();
+        appData.completedHistoryLog.push({ category: t.category, timestamp: new Date().toISOString() });
+        playSound([987, 1318]); saveEngineState();
     }
-
-    function evaluateQuestMilestonesInstantWatcher() {
-        if(!appData.quests || appData.quests.length === 0) return;
-        appData.quests.forEach(q => {
-            if(q.completed) return;
-            let runningCount = 0; const lowerTitle = q.text.toLowerCase();
-            if(q.category === "Vocabulary" || lowerTitle.includes("words") || lowerTitle.includes("vocab")) {
-                runningCount = appData.vocabulary.filter(v => v.weeklyTrackingMarker === "active").length;
-            } else {
-                runningCount = appData.completedHistoryLog.filter(log => log.category === q.category).length;
-            }
-            if(runningCount >= q.countNeeded) {
-                q.completed = true; appData.coins += q.rewardPoints;
-                playQuestFanfareChime();
-                launchInstantQuestAlertNotification(q.text, q.rewardPoints);
-            }
-        });
-    }
-
-    function launchInstantQuestAlertNotification(questTitle, rewardPoints) {
-        document.getElementById('quest-alert-text').innerHTML = `Splendid performance, Adi!<br>You successfully completed the weekly house quest:<br><b style="color:var(--gold); font-size:16px;">"${questTitle}"</b>`;
-        document.getElementById('quest-alert-payout').innerText = `+${rewardPoints}`;
-        document.getElementById('quest-alert-popup').style.display = 'flex';
-    }
-    function closeQuestNotificationModal() {
-        document.getElementById('quest-alert-popup').style.display = 'none';
-        if(document.getElementById('page-quests').classList.contains('active')) renderQuestsView();
-    }
-
+    
+    // QUESTS & REWARDS
     function renderQuestsView() {
-        const box = document.getElementById('quests-weekly-container'); box.innerHTML = "";
-        if(!appData.quests || appData.quests.length === 0) { box.innerHTML = "<p style='text-align:center; padding:20px; color:#776655; font-style:italic;'>No quests active.</p>"; return; }
-        appData.quests.forEach(q => {
-            let runningCount = 0; const lowerTitle = q.text.toLowerCase();
-            if(q.category === "Vocabulary" || lowerTitle.includes("words") || lowerTitle.includes("vocab")) {
-                runningCount = appData.vocabulary.filter(v => v.weeklyTrackingMarker === "active").length;
-            } else {
-                runningCount = appData.completedHistoryLog.filter(log => log.category === q.category).length;
-            }
-            box.innerHTML += `
-                <div class="quest-item-card ${q.completed ? 'unlocked-achieved' : ''}">
-                    <span class="quest-status-badge">${q.completed ? "ACHIEVED" : `PROGRESS: ${runningCount}/${q.countNeeded}`}</span>
-                    <strong style="color:var(--parchment); font-size:15px; letter-spacing:0.5px;">${q.text}</strong><br>
-                    <span style="font-size:12px; color:#aaa; display:inline-block; margin-top:6px;">Category Target: [${q.category}] | Payout: <span style="color:var(--gold); font-weight:bold;">+${q.rewardPoints}</span></span>
-                </div>`;
+        const b = document.getElementById('quests-weekly-container'); b.innerHTML = "";
+        (appData.quests || []).forEach(q => {
+            const count = (appData.completedHistoryLog||[]).filter(l=>l.category===q.category).length;
+            if(count >= q.countNeeded && !q.completed) { q.completed = true; appData.coins += q.rewardPoints; playSound([523, 659, 783, 1046]); saveEngineState(); }
+            b.innerHTML += `<div class="quest-item-card ${q.completed?'unlocked-achieved':''}"><b>${q.text}</b><br><small>Progress: ${count}/${q.countNeeded}</small></div>`;
         });
     }
-
-    function renderVocabularyArchive() {
-        const box = document.getElementById('vocab-archive-display'); box.innerHTML = "";
-        if(!appData.vocabulary || appData.vocabulary.length === 0) { box.innerHTML = "<p style='color:#776655; text-align:center; padding:20px; font-style:italic;'>Your scroll lexicon is blank.</p>"; return; }
-        appData.vocabulary.forEach(v => {
-            box.innerHTML += `<div class="vocab-card"><span class="vocab-timestamp">Logged: ${v.loggedDate}</span><b style="color:var(--gold); font-size:15px; letter-spacing:1px;">⚡ ${v.word.toUpperCase()}</b></div>`;
-        });
-    }
-
-    function handleNewWordSubmission(event) {
-        if (event.key !== 'Enter') return;
-        const input = document.getElementById('vocab-input-field'); const rawWordText = input.value.trim(); if (!rawWordText) return;
-        if(!appData.vocabulary) appData.vocabulary = [];
-        appData.vocabulary.unshift({ word: rawWordText, loggedDate: new Date().toLocaleDateString(), weeklyTrackingMarker: "active" });
-        evaluateQuestMilestonesInstantWatcher(); saveEngineState(); input.value = "";
-    }
-
-    function drawAllocationPieGraphicChart() {
-        const canvas = document.getElementById('analyticsPieCanvas'); const ctx = canvas.getContext('2d');
-        const legendBox = document.getElementById('analytics-pie-legend'); legendBox.innerHTML = "";
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        let frequencies = {};
-        (appData.completedHistoryLog || []).forEach(log => { frequencies[log.category] = (frequencies[log.category] || 0) + 1; });
-        const globalTotalCount = Object.values(frequencies).reduce((a, b) => a + b, 0);
-        
-        if (globalTotalCount === 0) {
-            ctx.fillStyle = "#2d2117"; ctx.beginPath(); ctx.arc(110, 110, 95, 0, 2*Math.PI); ctx.fill();
-            legendBox.innerHTML = "<p style='grid-column: 1/-1; text-align:center; margin:0; color:#776655; font-style:italic;'>Complete challenges to graph weekly distribution data!</p>";
-            return;
-        }
-
-        const colorProfiles = { "Study": "#FFD700", "Reading": "#740001", "Park": "#2ecc71", "Indoor play": "#3498db", "TV": "#9b59b6", "Guitar": "#e67e22", "Drawing": "#f1c40f", "Lego building": "#1abc9c", "Eating": "#e74c3c", "Sleeping": "#34495e", "Out on a drive": "#95a5a6" };
-        let startAngleRadian = 0;
-        Object.keys(frequencies).forEach(cat => {
-            const count = frequencies[cat]; const sliceAngle = (count / globalTotalCount) * 2 * Math.PI; const color = colorProfiles[cat] || "#444";
-            ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(110, 110); ctx.arc(110, 110, 95, startAngleRadian, startAngleRadian + sliceAngle); ctx.closePath(); ctx.fill();
-            const percentage = Math.round((count / globalTotalCount) * 100);
-            legendBox.innerHTML += `<div><span style="display:inline-block; width:10px; height:10px; background:${color}; margin-right:6px; border-radius:2px; vertical-align:middle;"></span><b>${cat}</b>: ${count} (${percentage}%)</div>`;
-            startAngleRadian += sliceAngle;
-        });
-    }
-
     function renderRewardsVaultView() {
-        const box = document.getElementById('rewards-container'); box.innerHTML = "";
-        if(!appData.rewards || appData.rewards.length === 0) { box.innerHTML = "<p style='text-align:center; padding:20px; color:#776655; font-style:italic;'>Chest items vacant.</p>"; return; }
-        appData.rewards.forEach(r => {
-            box.innerHTML += `
-                <div style="border:1px solid #4a3b2c; padding:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg, var(--card-bg) 0%, #17110c 100%); border-radius:6px;">
-                    <div><strong style="font-size:15px; color:#fff; vertical-align:middle;"><img src="treasure chest.jpg" class="embedded-chest-badge" onerror="this.style.display='none'">${r.text}</strong><br><span style="font-size:12px; color:var(--gold); display:inline-block; margin-top:6px;">Chest Fee Cost: ${r.cost} Galleons</span></div>
-                    <button class="action-btn" onclick="buyRewardAction(${r.id}, ${r.cost})" style="padding:8px 16px;">Claim</button>
-                </div>`;
+        const b = document.getElementById('rewards-container'); b.innerHTML = "";
+        (appData.rewards || []).forEach(r => {
+            b.innerHTML += `<div class="task-item"><b>${r.text}</b><button onclick="buyReward(${r.id}, ${r.cost})">Claim</button></div>`;
         });
     }
-
-    function buyRewardAction(id, cost) {
-        if(appData.coins >= cost) { 
-            appData.coins -= cost; playTaskClinkChime(); saveEngineState();
-            alert("Mischief Managed! Reward claimed."); 
-        } else { 
-            alert(`Insufficient Reserves inside your Treasure Chest! You require ${cost - appData.coins} more Galleons.`); 
-        }
+    function buyReward(id, cost) {
+        if(appData.coins >= cost) { appData.coins -= cost; playSound([987, 1318]); saveEngineState(); }
+        else alert("Insufficient Galleons!");
     }
 
+    // ADMIN
     function toggleAdminForm() {
-        const val = document.querySelector('input[name="admin-mode"]:checked').value;
-        document.getElementById('form-add-task').style.display = (val === 'task') ? 'block' : 'none';
-        document.getElementById('form-add-quest').style.display = (val === 'quest') ? 'block' : 'none';
-        document.getElementById('form-add-reward').style.display = (val === 'reward') ? 'block' : 'none';
-        document.getElementById('form-edit-streak').style.display = (val === 'streak') ? 'block' : 'none';
-        document.getElementById('admin-inventory-section').style.display = (val === 'streak') ? 'none' : 'block';
+        const v = document.querySelector('input[name="admin-mode"]:checked').value;
+        ['task','quest','reward','streak'].forEach(x => document.getElementById('form-add-'+x)?.style.display = (v===x?'block':'none'));
+        document.getElementById('admin-inventory-section').style.display = (v==='streak'?'none':'block');
         syncAdminRepositoryList();
     }
-    
     function syncAdminRepositoryList() {
-        const val = document.querySelector('input[name="admin-mode"]:checked').value, heading = document.getElementById('repo-header-title'), container = document.getElementById('admin-live-repo-list'); container.innerHTML = "";
-        if (val === 'task') {
-            heading.innerText = "📋 Live Tasks Inventory (All Scheduled Dates)"; if (!appData.tasks || appData.tasks.length === 0) { container.innerHTML = "<p style='color:#666;'>No tasks found.</p>"; return; }
-            // Sort tasks by date for clearer admin planning
-            const sortedTasks = [...appData.tasks].sort((a,b) => b.id - a.id);
-            sortedTasks.forEach(t => { container.innerHTML += `<div class="repo-item"><input type="checkbox" class="repo-del-box" data-id="${t.id}" style="accent-color:red; width:18px; height:18px;"><div class="repo-details"><b>${t.text}</b> [${t.category}]<br><span style="color:var(--gold); font-size:12px;">📅 For Date: ${t.scheduledDate} | ⏰ Cutoff: ${formatTime12Hour(t.time)} | Reward: 🪙 ${t.originalPoints} ${t.completed ? '✅' : '⏳'}</span></div></div>`; });
-        } else if (val === 'quest') {
-            heading.innerText = "📋 Live Quests Inventory"; if (!appData.quests || appData.quests.length === 0) { container.innerHTML = "<p style='color:#666;'>No active quests.</p>"; return; }
-            appData.quests.forEach(q => { container.innerHTML += `<div class="repo-item"><input type="checkbox" class="repo-del-box" data-id="${q.id}" style="accent-color:red; width:18px; height:18px;"><div class="repo-details"><b>${q.text}</b><br><span style="color:var(--gold); font-size:12px;">Milestone target: ${q.countNeeded} events inside [${q.category}] | Reward: +${q.rewardPoints}</span></div></div>`; });
-        } else if (val === 'reward') {
-            heading.innerText = "📋 Live Rewards Inventory"; if (!appData.rewards || appData.rewards.length === 0) { container.innerHTML = "<p style='color:#666;'>No rewards configured.</p>"; return; }
-            appData.rewards.forEach(r => { container.innerHTML += `<div class="repo-item"><input type="checkbox" class="repo-del-box" data-id="${r.id}" style="accent-color:red; width:18px; height:18px;"><div class="repo-details"><b>${r.text}</b><br><span style="color:var(--gold); font-size:12px;">Deduction cost: 🪙 ${r.cost} Galleons</span></div></div>`; });
-        }
+        const v = document.querySelector('input[name="admin-mode"]:checked').value, b = document.getElementById('admin-live-repo-list'); b.innerHTML = "";
+        const data = v==='task'?appData.tasks:(v==='quest'?appData.quests:appData.rewards);
+        data.forEach(x => b.innerHTML += `<div class="repo-item"><input type="checkbox" class="repo-del-box" data-id="${x.id}"> <b>${x.text||x.text}</b></div>`);
     }
-    
-    function handleAddTask(e) { e.preventDefault(); const pVal = parseInt(document.getElementById('task-points').value); if(!appData.tasks) appData.tasks = []; appData.tasks.push({ id: Date.now(), text: document.getElementById('task-text').value, time: document.getElementById('task-time').value, originalPoints: pVal, targetPoints: pVal, category: document.getElementById('task-category').value, completed: false, scheduledDate: document.getElementById('task-sched-date').value }); saveEngineState(); e.target.reset(); document.getElementById('task-sched-date').value = getFormattedLocalDateString(new Date()); }
-    function handleAddTaskQuest(e) { e.preventDefault(); if(!appData.quests) appData.quests = []; appData.quests.push({ id: Date.now(), text: document.getElementById('quest-text').value, category: document.getElementById('quest-category').value, countNeeded: parseInt(document.getElementById('quest-count').value), rewardPoints: parseInt(document.getElementById('quest-reward').value), completed: false }); saveEngineState(); e.target.reset(); }
-    function handleAddTaskReward(e) { e.preventDefault(); if(!appData.rewards) appData.rewards = []; appData.rewards.push({ id: Date.now(), text: document.getElementById('reward-text').value, cost: parseInt(document.getElementById('reward-cost').value) }); saveEngineState(); e.target.reset(); }
-    
+    function handleAddTask(e) { e.preventDefault(); if(!appData.tasks) appData.tasks=[]; appData.tasks.push({id:Date.now(), text:document.getElementById('task-text').value, time:document.getElementById('task-time').value, targetPoints:parseInt(document.getElementById('task-points').value), category:document.getElementById('task-category').value, completed:false, scheduledDate:document.getElementById('task-sched-date').value}); saveEngineState(); }
+    function handleAddTaskQuest(e) { e.preventDefault(); if(!appData.quests) appData.quests=[]; appData.quests.push({id:Date.now(), text:document.getElementById('quest-text').value, category:document.getElementById('quest-category').value, countNeeded:parseInt(document.getElementById('quest-count').value), rewardPoints:parseInt(document.getElementById('quest-reward').value), completed:false}); saveEngineState(); }
+    function handleAddTaskReward(e) { e.preventDefault(); if(!appData.rewards) appData.rewards=[]; appData.rewards.push({id:Date.now(), text:document.getElementById('reward-text').value, cost:parseInt(document.getElementById('reward-cost').value)}); saveEngineState(); }
+    function handleOverrideStreakValue(e) { e.preventDefault(); appData.streak = parseInt(document.getElementById('admin-streak-field').value); saveEngineState(); }
     function executeSelectedEraserSpell() {
-        const val = document.querySelector('input[name="admin-mode"]:checked').value, checkboxes = document.querySelectorAll('.repo-del-box:checked'); if(checkboxes.length === 0) { alert("Select targets to erase!"); return; }
-        if(confirm(`Apply Evanesco spell onto these ${checkboxes.length} records?`)) {
-            checkboxes.forEach(cb => { const idToVanish = parseInt(cb.getAttribute('data-id')); if (val === 'task') appData.tasks = appData.tasks.filter(t => t.id !== idToVanish); if (val === 'quest') appData.quests = appData.quests.filter(q => q.id !== idToVanish); if (val === 'reward') appData.rewards = appData.rewards.filter(r => r.id !== idToVanish); });
-            saveEngineState();
-        }
+        const v = document.querySelector('input[name="admin-mode"]:checked').value, c = document.querySelectorAll('.repo-del-box:checked');
+        c.forEach(i => { const id = parseInt(i.dataset.id); if(v==='task') appData.tasks=appData.tasks.filter(x=>x.id!==id); if(v==='quest') appData.quests=appData.quests.filter(x=>x.id!==id); if(v==='reward') appData.rewards=appData.rewards.filter(x=>x.id!==id); });
+        saveEngineState();
     }
-
-    function handleOverrideStreakValue(e) { e.preventDefault(); const inputVal = parseInt(document.getElementById('admin-streak-field').value); if (isNaN(inputVal) || inputVal < 0) { alert("Invalid value!"); return; } appData.streak = inputVal; saveEngineState(); alert("Streak adjusted inside cloud master sync config."); }
-
-    function toggleClockMode() { appData.clockMode = appData.clockMode === 'analog' ? 'digital' : 'analog'; saveEngineState(); renderClock(); }
-    function renderClock() {
-        const now = new Date(); const analogCanvas = document.getElementById('analog-canvas'); const digitalDiv = document.getElementById('digital-clock');
-        if (appData.clockMode === 'analog') { analogCanvas.style.display = 'block'; digitalDiv.style.display = 'none'; drawAnalogClock(now, analogCanvas.getContext('2d')); } 
-        else { analogCanvas.style.display = 'none'; digitalDiv.style.display = 'block'; digitalDiv.innerText = now.toLocaleTimeString(); }
-    }
-    function drawAnalogClock(date, ctx) {
-        ctx.clearRect(0, 0, 80, 80); ctx.save(); ctx.translate(40, 40); ctx.beginPath(); ctx.arc(0, 0, 36, 0, 2*Math.PI); ctx.fillStyle = '#110d0a'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#FFD700'; ctx.stroke();
-        let hour = date.getHours() % 12, min = date.getMinutes(), sec = date.getSeconds();
-        drawClockHand(ctx, (hour * Math.PI / 6) + (min * Math.PI / 360), 16, 2.5, '#FFD700'); drawClockHand(ctx, (min * Math.PI / 30) + (sec * Math.PI / 1800), 24, 1.5, '#dbcbb4'); drawClockHand(ctx, (sec * Math.PI / 30), 27, 1, '#ff3333'); ctx.restore();
-    }
-    function drawClockHand(ctx, angle, length, width, color) { ctx.save(); ctx.rotate(angle); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -length); ctx.lineWidth = width; ctx.strokeStyle = color; ctx.lineCap = "round"; ctx.stroke(); ctx.restore(); }
-
-    function accessAdminPanel() { if(prompt("🔑 Present Secret Password verification pattern to pass:") === ADMIN_PASS) navigateTo('page-admin'); else alert("Entry Denied!"); }
-    function exitAdmin() { if(appData.lastLoginNumericalKey) navigateTo('page-hub'); else navigateTo('page-login'); }
-
+    
+    function accessAdminPanel() { if(prompt("🔑 Passcode:") === ADMIN_PASS) navigateTo('page-admin'); }
+    function exitAdmin() { navigateTo('page-hub'); }
     setInterval(renderClock, 1000); renderClock();
 </script>
 </body>
