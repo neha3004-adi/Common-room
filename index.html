@@ -7,25 +7,72 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
-        /* All your styles remain the same, keeping them brief here for clarity */
-        :root { --gold: #FFD700; --scarlet: #740001; }
-        body { background: #141414; color: #F4EAD4; font-family: Georgia, serif; }
-        .container { max-width: 650px; margin: 30px auto; border: 3px double var(--gold); padding: 25px; background: #0f0a08; border-radius: 12px; }
+        :root { --gold: #FFD700; --scarlet: #740001; --dark-red: #3A0000; --parchment: #F4EAD4; --charcoal: #141414; --card-bg: #1e1711; }
+        body { font-family: 'Georgia', serif; background-color: var(--charcoal); color: var(--parchment); padding: 20px; margin: 0; min-height: 100vh; }
+        .container { max-width: 650px; margin: 30px auto; border: 3px double var(--gold); padding: 25px; background: rgba(15, 10, 8, 0.95); position: relative; border-radius: 12px; }
         .page { display: none; } .active { display: block; }
-        button.action-btn { background: var(--scarlet); color: #F4EAD4; border: 1px solid var(--gold); padding: 12px; cursor: pointer; }
+        .summary-hud { background: linear-gradient(135deg, var(--scarlet) 0%, var(--dark-red) 100%); border: 2px solid var(--gold); padding: 15px; border-radius: 8px; margin-bottom: 25px; }
+        .menu-tab { border: 2px solid #3a2a1d; padding: 18px; background: #1e1711; margin-bottom: 10px; cursor: pointer; border-radius: 6px; }
+        .menu-tab:hover { border-color: var(--gold); color: var(--gold); }
+        button.action-btn { background: var(--scarlet); color: var(--parchment); border: 1px solid var(--gold); padding: 12px; width: 100%; cursor: pointer; font-weight: bold; }
+        .task-item { background: #1e1711; border: 1px solid #4a3b2c; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .admin-keyhole { position: absolute; bottom: 10px; right: 10px; cursor: pointer; background: none; border: none; }
     </style>
 </head>
 <body>
+
 <div class="container">
+    <button class="admin-keyhole" onclick="accessAdminPanel()">🔑</button>
+
+    <div id="master-summary-hud" class="summary-hud" style="display: none;">
+        <h3 onclick="navigateTo('page-hub')" style="cursor:pointer; color:var(--gold);">⚡ Gryffindor Common Room ⚡</h3>
+        <p>Streak: <span id="hud-streak">0</span> | Galleons: <span id="hud-coins">0</span></p>
+        <div onclick="logoutAdiFromEngine()" style="cursor:pointer; font-size: 12px; color: var(--gold);">[ 🏃‍♂️ Sign Out ]</div>
+    </div>
+
     <div id="page-login" class="page active">
         <h1 style="text-align: center; color: var(--gold);">⚡ Welcome to Hogwarts ⚡</h1>
-        <button class="action-btn" onclick="loginAdi()" style="width: 100%;">Enter Common Room</button>
+        <button class="action-btn" onclick="loginAdi()">Enter Common Room</button>
     </div>
-    <!-- Other pages would follow here -->
+
+    <div id="page-hub" class="page">
+        <div class="menu-tab" onclick="navigateTo('page-challenges')">🎯 Today's Challenges</div>
+        <div class="menu-tab" onclick="navigateTo('page-quests')">🏆 Weekly Quests</div>
+        <div class="menu-tab" onclick="navigateTo('page-rewards')">📦 Treasure Chest</div>
+    </div>
+
+    <div id="page-challenges" class="page">
+        <h2>🎯 Today's Challenges</h2>
+        <div id="task-container"></div>
+        <button class="action-btn" onclick="navigateTo('page-hub')">↩ Return</button>
+    </div>
+
+    <div id="page-quests" class="page">
+        <h2>🏆 Quests</h2>
+        <div id="quests-weekly-container"></div>
+        <button class="action-btn" onclick="navigateTo('page-hub')">↩ Return</button>
+    </div>
+
+    <div id="page-rewards" class="page">
+        <h2>📦 Rewards</h2>
+        <div id="rewards-container"></div>
+        <button class="action-btn" onclick="navigateTo('page-hub')">↩ Return</button>
+    </div>
+
+    <div id="page-admin" class="page">
+        <h2>🛡️ Prefect Admin</h2>
+        <form onsubmit="handleAddTask(event)">
+            <input type="text" id="task-text" placeholder="Task Name" required>
+            <input type="number" id="task-points" placeholder="Points" required>
+            <input type="date" id="task-sched-date" required>
+            <button type="submit" class="action-btn">Cast Task</button>
+        </form>
+        <button class="action-btn" onclick="exitAdmin()">↩ Exit</button>
+    </div>
 </div>
 
 <script>
-    // 1. CONFIGURATION
+    // YOUR LIVE CREDENTIALS
     const firebaseConfig = {
         apiKey: "AIzaSyBXE-12Q8pM6_sTyfhYmMAiNhXgJV_R7Ck",
         authDomain: "adi-day-planner.firebaseapp.com",
@@ -35,32 +82,61 @@
         appId: "1:582460179914:web:53a7eae94028fdebf9bb33"
     };
 
-    // 2. INITIALIZATION
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const docRef = db.collection("house_engine").doc("master_state");
 
-    let appData = { coins: 0, streak: 0, lastLoginNumericalKey: 0, tasks: [] };
+    let appData = { coins: 0, streak: 0, lastLoginNumericalKey: 0, tasks: [], quests: [], rewards: [] };
 
     docRef.onSnapshot((doc) => {
         if (doc.exists()) {
             appData = doc.data();
-        } else {
-            docRef.set(appData);
+            updateHubTrackers();
         }
     });
 
-    // 3. LOGIN LOGIC
-    function loginAdi() {
-        console.log("Login button clicked!");
-        // Simplified login for testing
-        navigateTo('page-hub');
-    }
-
+    function saveEngineState() { docRef.set(appData); }
     function navigateTo(p) {
         document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
         document.getElementById(p).classList.add('active');
+        document.getElementById('master-summary-hud').style.display = (p === 'page-login' || p === 'page-admin') ? 'none' : 'block';
+        if(p === 'page-challenges') renderTasks();
     }
+
+    function loginAdi() {
+        const n = new Date();
+        const k = (n.getFullYear()*10000) + ((n.getMonth()+1)*100) + n.getDate();
+        if (appData.lastLoginNumericalKey !== k) { appData.streak++; appData.lastLoginNumericalKey = k; }
+        saveEngineState(); navigateTo('page-hub');
+    }
+
+    function updateHubTrackers() {
+        document.getElementById('hud-coins').innerText = appData.coins || 0;
+        document.getElementById('hud-streak').innerText = appData.streak || 0;
+    }
+
+    function renderTasks() {
+        const b = document.getElementById('task-container'); b.innerHTML = "";
+        const today = new Date().toISOString().split('T')[0];
+        (appData.tasks || []).filter(t => t.scheduledDate === today).forEach(t => {
+            b.innerHTML += `<div class="task-item"><b>${t.text}</b><input type="checkbox" ${t.completed?'checked':''} onchange="completeTask(${t.id})"></div>`;
+        });
+    }
+
+    function completeTask(id) {
+        const t = appData.tasks.find(x => x.id === id); t.completed = true; appData.coins += t.targetPoints; saveEngineState();
+    }
+
+    function handleAddTask(e) {
+        e.preventDefault();
+        appData.tasks.push({ id: Date.now(), text: document.getElementById('task-text').value, targetPoints: parseInt(document.getElementById('task-points').value), completed: false, scheduledDate: document.getElementById('task-sched-date').value });
+        saveEngineState(); e.target.reset();
+    }
+
+    function accessAdminPanel() { if(prompt("Passcode:") === "1211") navigateTo('page-admin'); }
+    function exitAdmin() { navigateTo('page-hub'); }
+    function logoutAdiFromEngine() { navigateTo('page-login'); }
+
 </script>
 </body>
 </html>
