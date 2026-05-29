@@ -378,23 +378,31 @@
         return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
     }
 
+    function getTodayLocalDateString() {
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
     const currentActiveChronoWeekNumber = getISOWeekNum(new Date());
 
     const initialAdminStarterKitTemplate = {
         coins: 0, streak: 0, lastLoginNumericalKey: 0, clockMode: 'analog',
         lastCompletedWeekNumber: currentActiveChronoWeekNumber, 
         tasks: [
-            { id: 101, text: "Complete morning textbook assignments", time: "12:00", originalPoints: 300, targetPoints: 300, category: "Study", completed: false, dateStamp: new Date().toDateString() },
-            { id: 102, text: "Practice major scales & music scores", time: "16:00", originalPoints: 250, targetPoints: 250, category: "Guitar", completed: false, dateStamp: new Date().toDateString() },
-            { id: 103, text: "🏃‍♂️ Outdoor sports interval training", time: "19:00", originalPoints: 200, targetPoints: 200, category: "Park", completed: false, dateStamp: new Date().toDateString() },
-            { id: 104, text: "🧩 Work on structural Lego builds", time: "20:30", originalPoints: 150, targetPoints: 150, category: "Lego building", completed: false, dateStamp: new Date().toDateString() }
+            { id: 101, text: "Complete morning textbook assignments", time: "12:00", originalPoints: 300, targetPoints: 300, category: "Study", completed: false, dateStamp: getTodayLocalDateString() },
+            { id: 102, text: "Practice major scales & music scores", time: "16:00", originalPoints: 250, targetPoints: 250, category: "Guitar", completed: false, dateStamp: getTodayLocalDateString() },
+            { id: 103, text: " Outdoor sports interval training", time: "19:00", originalPoints: 200, targetPoints: 200, category: "Park", completed: false, dateStamp: getTodayLocalDateString() },
+            { id: 104, text: " Work on structural Lego builds", time: "20:30", originalPoints: 150, targetPoints: 150, category: "Lego building", completed: false, dateStamp: getTodayLocalDateString() }
         ],
         quests: [
-            { id: 201, text: "📚 Achieve Deep Focus (3 Study Tasks)", category: "Study", countNeeded: 3, rewardPoints: 1000, completed: false },
-            { id: 202, text: "🦅 The Summer Scholar (5 New Vocabulary Words)", category: "Vocabulary", countNeeded: 5, rewardPoints: 1200, completed: false }
+            { id: 201, text: " Achieved Deep Focus (3 Study Tasks)", category: "Study", countNeeded: 3, rewardPoints: 1000, completed: false, dateStamp: getTodayLocalDateString() },
+            { id: 202, text: " The Summer Scholar (5 New Vocabulary Words)", category: "Vocabulary", countNeeded: 5, rewardPoints: 1200, completed: false, dateStamp: getTodayLocalDateString() }
         ],
         rewards: [
-            { id: 301, text: "🎬 Magical Family Movie Night Outing", cost: 1500 },
+            { id: 301, text: " Magical Family Movie Night Outing", cost: 1500 },
             { id: 302, text: "Dismantle one massive Lego set box", cost: 500 },
             { id: 303, text: "Double scoop ice cream common room party", cost: 800 }
         ],
@@ -404,7 +412,7 @@
 
     let appData = initialAdminStarterKitTemplate;
 
-    // --- FIREBASE CLOUD CORE INFRASTRUCTURE CONFIGURATION ---
+    // --- FIREBASE INITIALIZATION ENGINE ---
     const firebaseConfig = {
         apiKey: "AIzaSyBXE-12Q8pM6_sTyfhYmMAiNhXgJV_R7Ck",
         authDomain: "adi-day-planner.firebaseapp.com",
@@ -423,21 +431,19 @@
             docRef.set(appData);
             localStorage.setItem('hp_adi_engine_v5_stable', JSON.stringify(appData));
         } catch (e) {
-            console.error("Cloud vault save failure: ", e);
+            console.error("Database tracking fault: ", e);
         }
     }
 
     docRef.onSnapshot((doc) => {
         if (doc.exists()) {
-            const cloudData = doc.data();
-            appData = cloudData;
+            appData = doc.data();
             
             if(!appData.vocabulary) appData.vocabulary = []; 
             if(!appData.rewards) appData.rewards = [];
             if(!appData.tasks) appData.tasks = []; 
             if(!appData.quests) appData.quests = [];
             if(!appData.completedHistoryLog) appData.completedHistoryLog = [];
-            if(typeof appData.lastLoginNumericalKey === "undefined") appData.lastLoginNumericalKey = 0;
             
             if(document.getElementById('master-summary-hud').style.display === 'block') {
                 updateHubTrackers();
@@ -452,12 +458,32 @@
             docRef.set(initialAdminStarterKitTemplate);
         }
     }, (error) => {
-        console.warn("Realtime sync fallback triggered. Loading local cache.");
-        let fetchedDatabase = localStorage.getItem('hp_adi_engine_v5_stable');
-        if (fetchedDatabase) {
-            appData = JSON.parse(fetchedDatabase);
-        }
+        let localCache = localStorage.getItem('hp_adi_engine_v5_stable');
+        if (localCache) appData = JSON.parse(localCache);
     });
+
+    // --- ADMINISTRATIVE SECTIONS DYNAMIC FORM RENDER UPGRADES ---
+    function injectFutureDateInputFields() {
+        const todayStr = getTodayLocalDateString();
+        
+        // Target task form container inputs
+        const taskForm = document.getElementById('form-add-task');
+        if (taskForm && !document.getElementById('task-sched-date')) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'form-group';
+            wrapper.innerHTML = `<label>SCHEDULED FOR DATE:</label><input type="date" id="task-sched-date" required value="${todayStr}">`;
+            taskForm.insertBefore(wrapper, taskForm.querySelector('button[type="submit"]'));
+        }
+
+        // Target long term quest form containers
+        const questForm = document.getElementById('form-add-quest');
+        if (questForm && !document.getElementById('quest-sched-date')) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'form-group';
+            wrapper.innerHTML = `<label>START SCHEDULING DATE:</label><input type="date" id="quest-sched-date" required value="${todayStr}">`;
+            questForm.insertBefore(wrapper, questForm.querySelector('button[type="submit"]'));
+        }
+    }
 
     function formatTime12Hour(timeString) {
         if(!timeString) return "No Time Set";
@@ -478,6 +504,7 @@
         if(pageId === 'page-vocabulary') renderVocabularyArchive();
         if(pageId === 'page-analytics') drawAllocationPieGraphicChart();
         if(pageId === 'page-admin') {
+            injectFutureDateInputFields();
             document.getElementById('admin-streak-field').value = appData.streak || 0;
             syncAdminRepositoryList();
         }
@@ -496,7 +523,7 @@
             appData.completedHistoryLog = [];
             if(appData.quests) appData.quests.forEach(q => { q.completed = false; });
             if(appData.vocabulary) { appData.vocabulary.forEach(v => { v.weeklyTrackingMarker = "historical"; }); }
-            alert("Notice: A new week has dawned! Your weekly activity charts and quests have reset.");
+            alert("Notice: A new week has dawned! Weekly assignments and quests have reset.");
         }
         
         appData.lastCompletedWeekNumber = trackingWeek;
@@ -513,15 +540,23 @@
 
     function updateHubTrackers() {
         document.getElementById('hud-coins').innerText = appData.coins; document.getElementById('hud-streak').innerText = appData.streak;
-        const total = appData.tasks.length, done = appData.tasks.filter(t => t.completed).length;
+        const todayStr = getTodayLocalDateString();
+        const runningTodayTasks = appData.tasks.filter(t => t.dateStamp === todayStr);
+        const total = runningTodayTasks.length, done = runningTodayTasks.filter(t => t.completed).length;
         document.getElementById('hub-task-ratio').innerText = `${done}/${total}`;
-        document.getElementById('challenges-header-progress').innerText = `${done} out of ${total} Tasks Completed`;
+        document.getElementById('challenges-header-progress').innerText = `${done} out of ${total} Tasks Scheduled For Today Completed`;
     }
 
     function renderTasks() {
         const box = document.getElementById('task-container'); box.innerHTML = "";
-        if(appData.tasks.length === 0) { box.innerHTML = "<p style='color:#776655; text-align:center; font-style:italic; padding:15px;'>Notice board challenges are empty.</p>"; return; }
-        appData.tasks.forEach(task => {
+        const todayStr = getTodayLocalDateString();
+        const runningTodayTasks = appData.tasks.filter(t => t.dateStamp === todayStr);
+        
+        if(runningTodayTasks.length === 0) { 
+            box.innerHTML = "<p style='color:#776655; text-align:center; font-style:italic; padding:15px;'>No magical board challenges active for today.</p>"; 
+            return; 
+        }
+        runningTodayTasks.forEach(task => {
             box.innerHTML += `
                 <div class="task-item ${task.completed ? 'completed' : ''}">
                     <div>
@@ -538,8 +573,7 @@
         const task = appData.tasks.find(t => t.id === id); if(!task || task.completed) return;
         task.completed = true; appData.coins += task.targetPoints;
         appData.completedHistoryLog.push({ category: task.category, timestamp: new Date().toISOString() });
-        playTaskClinkChime();
-        evaluateQuestMilestonesInstantWatcher();
+        playTaskClinkChime(); evaluateQuestMilestonesInstantWatcher();
         saveEngineState(); updateHubTrackers(); renderTasks();
     }
 
@@ -555,17 +589,17 @@
             }
             if(runningCount >= q.countNeeded) {
                 q.completed = true; appData.coins += q.rewardPoints; saveEngineState(); updateHubTrackers();
-                playQuestFanfareChime();
-                launchInstantQuestAlertNotification(q.text, q.rewardPoints);
+                playQuestFanfareChime(); launchInstantQuestAlertNotification(q.text, q.rewardPoints);
             }
         });
     }
 
     function launchInstantQuestAlertNotification(questTitle, rewardPoints) {
-        document.getElementById('quest-alert-text').innerHTML = `Splendid performance, Adi!<br>You successfully completed the weekly house quest:<br><b style="color:var(--gold); font-size:16px;">"${questTitle}"</b>`;
+        document.getElementById('quest-alert-text').innerHTML = `Splendid performance, Adi!<br>You completed the weekly quest:<br><b style="color:var(--gold); font-size:16px;">"${questTitle}"</b>`;
         document.getElementById('quest-alert-payout').innerText = `+${rewardPoints}`;
         document.getElementById('quest-alert-popup').style.display = 'flex';
     }
+    
     function closeQuestNotificationModal() {
         document.getElementById('quest-alert-popup').style.display = 'none';
         if(document.getElementById('page-quests').classList.contains('active')) renderQuestsView();
@@ -573,7 +607,7 @@
 
     function renderQuestsView() {
         const box = document.getElementById('quests-weekly-container'); box.innerHTML = "";
-        if(!appData.quests || appData.quests.length === 0) { box.innerHTML = "<p style='text-align:center; padding:20px; color:#776655; font-style:italic;'>No quests active from the Prefects.</p>"; return; }
+        if(!appData.quests || appData.quests.length === 0) { box.innerHTML = "<p style='text-align:center; padding:20px; color:#776655; font-style:italic;'>No active weekly quests.</p>"; return; }
         appData.quests.forEach(q => {
             let runningCount = 0; const lowerTitle = q.text.toLowerCase();
             if(q.category === "Vocabulary" || lowerTitle.includes("words") || lowerTitle.includes("vocab")) {
@@ -585,14 +619,14 @@
                 <div class="quest-item-card ${q.completed ? 'unlocked-achieved' : ''}">
                     <span class="quest-status-badge">${q.completed ? "ACHIEVED" : `PROGRESS: ${runningCount}/${q.countNeeded}`}</span>
                     <strong style="color:var(--parchment); font-size:15px; letter-spacing:0.5px;">${q.text}</strong><br>
-                    <span style="font-size:12px; color:#aaa; display:inline-block; margin-top:6px;">Category Target: [${q.category}] | Payout: <span style="color:var(--gold); font-weight:bold;">+${q.rewardPoints}</span></span>
+                    <span style="font-size:12px; color:#aaa; display:inline-block; margin-top:6px;">Target: [${q.category}] | Scheduled: ${q.dateStamp || 'This Week'} | Payout: <span style="color:var(--gold); font-weight:bold;">+${q.rewardPoints}</span></span>
                 </div>`;
         });
     }
 
     function renderVocabularyArchive() {
         const box = document.getElementById('vocab-archive-display'); box.innerHTML = "";
-        if(appData.vocabulary.length === 0) { box.innerHTML = "<p style='color:#776655; text-align:center; padding:20px; font-style:italic;'>Your scroll lexicon is blank.</p>"; return; }
+        if(appData.vocabulary.length === 0) { box.innerHTML = "<p style='color:#776655; text-align:center; padding:20px; font-style:italic;'>Your scroll lexicon is currently blank.</p>"; return; }
         appData.vocabulary.forEach(v => {
             box.innerHTML += `<div class="vocab-card"><span class="vocab-timestamp">Logged: ${v.loggedDate}</span><b style="color:var(--gold); font-size:15px; letter-spacing:1px;">⚡ ${v.word.toUpperCase()}</b></div>`;
         });
@@ -615,7 +649,7 @@
         
         if (globalTotalCount === 0) {
             ctx.fillStyle = "#2d2117"; ctx.beginPath(); ctx.arc(110, 110, 95, 0, 2*Math.PI); ctx.fill();
-            legendBox.innerHTML = "<p style='grid-column: 1/-1; text-align:center; margin:0; color:#776655; font-style:italic;'>Complete challenges to graph weekly distribution data!</p>";
+            legendBox.innerHTML = "<p style='grid-column: 1/-1; text-align:center; margin:0; color:#776655; font-style:italic;'>Complete assignments to generate metrics map.</p>";
             return;
         }
 
@@ -637,7 +671,7 @@
 
     function renderRewardsVaultView() {
         const box = document.getElementById('rewards-container'); box.innerHTML = "";
-        if(appData.rewards.length === 0) { box.innerHTML = "<p style='text-align:center; padding:20px; color:#776655; font-style:italic;'>Chest items vacant.</p>"; return; }
+        if(appData.rewards.length === 0) { box.innerHTML = "<p style='text-align:center; padding:20px; color:#776655; font-style:italic;'>Chest vault items vacant.</p>"; return; }
         appData.rewards.forEach(r => {
             box.innerHTML += `
                 <div style="border:1px solid #4a3b2c; padding:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg, var(--card-bg) 0%, #17110c 100%); border-radius:6px;">
@@ -653,7 +687,7 @@
             saveEngineState(); updateHubTrackers(); renderRewardsVaultView(); 
             alert("Mischief Managed! Reward claimed."); 
         } else { 
-            alert(`The Gringotts Goblins say: Insufficient Reserves inside your Treasure Chest! You require ${cost - appData.coins} more Galleons.`); 
+            alert(`Insufficient Reserves! You require ${cost - appData.coins} more Galleons.`); 
         }
     }
 
@@ -670,31 +704,60 @@
     function handleOverrideStreakValue(e) {
         e.preventDefault();
         const inputVal = parseInt(document.getElementById('admin-streak-field').value);
-        if (isNaN(inputVal) || inputVal < 0) { alert("Invalid input sequence value!"); return; }
-        appData.streak = inputVal;
-        saveEngineState();
-        alert(`🔮 Transmutation Complete! Streak values updated to ${inputVal} Days.`);
+        if (isNaN(inputVal) || inputVal < 0) { alert("Invalid selection parameter input!"); return; }
+        appData.streak = inputVal; saveEngineState();
+        alert(`🔮 Streak values overridden manually to ${inputVal} Days.`);
     }
 
     function syncAdminRepositoryList() {
         const val = document.querySelector('input[name="admin-mode"]:checked').value, heading = document.getElementById('repo-header-title'), container = document.getElementById('admin-live-repo-list'); container.innerHTML = "";
         if (val === 'task') {
-            heading.innerText = "📋 Live Tasks Inventory"; if (appData.tasks.length === 0) { container.innerHTML = "<p style='color:#666;'>No active tasks mapped.</p>"; return; }
-            appData.tasks.forEach(t => { container.innerHTML += `<div class="repo-item"><input type="checkbox" class="repo-del-box" data-id="${t.id}" style="accent-color:red; width:18px; height:18px;"><div class="repo-details"><b>${t.text}</b> [${t.category}]<br><span style="color:var(--gold); font-size:12px;">Cutoff: ${formatTime12Hour(t.time)} | Reward: 🪙 ${t.originalPoints}</span></div></div>`; });
+            heading.innerText = "📋 Live Tasks Inventory (All Scheduled Dates)"; if (appData.tasks.length === 0) { container.innerHTML = "<p style='color:#666;'>No active tasks mapped.</p>"; return; }
+            appData.tasks.sort((a,b)=>a.dateStamp.localeCompare(b.dateStamp)).forEach(t => { container.innerHTML += `<div class="repo-item"><input type="checkbox" class="repo-del-box" data-id="${t.id}" style="accent-color:red; width:18px; height:18px;"><div class="repo-details"><b>${t.text}</b> [${t.category}]<br><span style="color:var(--gold); font-size:12px;">Scheduled: ${t.dateStamp} at ${formatTime12Hour(t.time)} | Payout: 🪙 ${t.originalPoints}</span></div></div>`; });
         } else if (val === 'quest') {
-            heading.innerText = "📋 Live Quests Inventory"; if (appData.quests.length === 0) { container.innerHTML = "<p style='color:#666;'>No active quests mapped.</p>"; return; }
-            appData.quests.forEach(q => { container.innerHTML += `<div class="repo-item"><input type="checkbox" class="repo-del-box" data-id="${q.id}" style="accent-color:red; width:18px; height:18px;"><div class="repo-details"><b>${q.text}</b><br><span style="color:var(--gold); font-size:12px;">Milestone target: ${q.countNeeded} events inside [${q.category}] | Reward: +${q.rewardPoints}</span></div></div>`; });
+            heading.innerText = "📋 Live Quests Inventory"; if (appData.quests.length === 0) { container.innerHTML = "<p style='color:#666;'>No active long-term quests mapped.</p>"; return; }
+            appData.quests.forEach(q => { container.innerHTML += `<div class="repo-item"><input type="checkbox" class="repo-del-box" data-id="${q.id}" style="accent-color:red; width:18px; height:18px;"><div class="repo-details"><b>${q.text}</b><br><span style="color:var(--gold); font-size:12px;">Target: ${q.countNeeded} matching [${q.category}] | Starting: ${q.dateStamp || 'Immediate'} | Reward: +${q.rewardPoints}</span></div></div>`; });
         } else if (val === 'reward') {
-            heading.innerText = "📋 Live Rewards Inventory"; if (appData.rewards.length === 0) { container.innerHTML = "<p style='color:#666;'>No rewards items configured.</p>"; return; }
-            appData.rewards.forEach(r => { container.innerHTML += `<div class="repo-item"><input type="checkbox" class="repo-del-box" data-id="${r.id}" style="accent-color:red; width:18px; height:18px;"><div class="repo-details"><b>${r.text}</b><br><span style="color:var(--gold); font-size:12px;">Deduction cost: 🪙 ${r.cost} Galleons</span></div></div>`; });
+            heading.innerText = "📋 Live Rewards Inventory"; if (appData.rewards.length === 0) { container.innerHTML = "<p style='color:#666;'>No reward items configured in vault.</p>"; return; }
+            appData.rewards.forEach(r => { container.innerHTML += `<div class="repo-item"><input type="checkbox" class="repo-del-box" data-id="${r.id}" style="accent-color:red; width:18px; height:18px;"><div class="repo-details"><b>${r.text}</b><br><span style="color:var(--gold); font-size:12px;">Deduction price cost: 🪙 ${r.cost} Galleons</span></div></div>`; });
         }
     }
-    function handleAddTask(e) { e.preventDefault(); const pVal = parseInt(document.getElementById('task-points').value); appData.tasks.push({ id: Date.now(), text: document.getElementById('task-text').value, time: document.getElementById('task-time').value, originalPoints: pVal, targetPoints: pVal, category: document.getElementById('task-category').value, completed: false, dateStamp: new Date().toDateString() }); saveEngineState(); syncAdminRepositoryList(); e.target.reset(); }
-    function handleAddTaskQuest(e) { e.preventDefault(); appData.quests.push({ id: Date.now(), text: document.getElementById('quest-text').value, category: document.getElementById('quest-category').value, countNeeded: parseInt(document.getElementById('quest-count').value), rewardPoints: parseInt(document.getElementById('quest-reward').value), completed: false }); saveEngineState(); syncAdminRepositoryList(); e.target.reset(); }
-    function handleAddTaskReward(e) { e.preventDefault(); appData.rewards.push({ id: Date.now(), text: document.getElementById('reward-text').value, cost: parseInt(document.getElementById('reward-cost').value) }); saveEngineState(); syncAdminRepositoryList(); e.target.reset(); }
+    
+    function handleAddTask(e) { 
+        e.preventDefault(); 
+        const pVal = parseInt(document.getElementById('task-points').value); 
+        appData.tasks.push({ 
+            id: Date.now(), 
+            text: document.getElementById('task-text').value, 
+            time: document.getElementById('task-time').value, 
+            originalPoints: pVal, 
+            targetPoints: pVal, 
+            category: document.getElementById('task-category').value, 
+            completed: false, 
+            dateStamp: document.getElementById('task-sched-date').value 
+        }); 
+        saveEngineState(); syncAdminRepositoryList(); e.target.reset(); injectFutureDateInputFields(); alert("Task successfully scheduled in cloud database!");
+    }
+    
+    function handleAddTaskQuest(e) { 
+        e.preventDefault(); 
+        appData.quests.push({ 
+            id: Date.now(), 
+            text: document.getElementById('quest-text').value, 
+            category: document.getElementById('quest-category').value, 
+            countNeeded: parseInt(document.getElementById('quest-count').value), 
+            rewardPoints: parseInt(document.getElementById('quest-reward').value), 
+            completed: false,
+            dateStamp: document.getElementById('quest-sched-date').value
+        }); 
+        saveEngineState(); syncAdminRepositoryList(); e.target.reset(); injectFutureDateInputFields(); alert("Quest successfully scheduled in cloud database!");
+    }
+    
+    function handleAddTaskReward(e) { e.preventDefault(); appData.rewards.push({ id: Date.now(), text: document.getElementById('reward-text').value, cost: parseInt(document.getElementById('reward-cost').value) }); saveEngineState(); syncAdminRepositoryList(); e.target.reset(); alert("Reward added successfully!"); }
+    
     function executeSelectedEraserSpell() {
-        const val = document.querySelector('input[name="admin-mode"]:checked').value, checkboxes = document.querySelectorAll('.repo-del-box:checked'); if(checkboxes.length === 0) { alert("Select targets to erase!"); return; }
-        if(confirm(`Apply Evanesco spell onto these ${checkboxes.length} records?`)) {
+        const val = document.querySelector('input[name="admin-mode"]:checked').value, checkboxes = document.querySelectorAll('.repo-del-box:checked'); if(checkboxes.length === 0) { alert("Select targets to delete!"); return; }
+        if(confirm(`Erase these ${checkboxes.length} records globally?`)) {
             checkboxes.forEach(cb => { const idToVanish = parseInt(cb.getAttribute('data-id')); if (val === 'task') appData.tasks = appData.tasks.filter(t => t.id !== idToVanish); if (val === 'quest') appData.quests = appData.quests.filter(q => q.id !== idToVanish); if (val === 'reward') appData.rewards = appData.rewards.filter(r => r.id !== idToVanish); });
             saveEngineState(); syncAdminRepositoryList(); updateHubTrackers();
         }
@@ -713,10 +776,10 @@
     }
     function drawClockHand(ctx, angle, length, width, color) { ctx.save(); ctx.rotate(angle); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -length); ctx.lineWidth = width; ctx.strokeStyle = color; ctx.lineCap = "round"; ctx.stroke(); ctx.restore(); }
 
-    function accessAdminPanel() { if(prompt("🔑 Present Secret Password verification pattern to pass:") === ADMIN_PASS) navigateTo('page-admin'); else alert("Entry Denied!"); }
+    function accessAdminPanel() { if(prompt("🔑 Present Secret Password Pattern Verification:") === ADMIN_PASS) navigateTo('page-admin'); else alert("Entry Denied!"); }
     function exitAdmin() { if(appData.lastLoginNumericalKey) navigateTo('page-hub'); else navigateTo('page-login'); }
 
     setInterval(renderClock, 1000); renderClock();
 </script>
-</body>
+    </body>
 </html>
